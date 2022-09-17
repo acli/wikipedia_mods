@@ -399,6 +399,11 @@ because changes to this table require changes to check_date() and to reformatter
 ]]
 
 local patterns = {
+	-- LOCAL: handle Cantonese dates
+	['年月日'] = {'^([0-9][0-9][0-9][0-9])年([0-9][0-9]?)月([0-9][0-9]?)[日號]$', 'y', 'm', 'd'},
+	['年月'] = {'^([0-9][0-9][0-9][0-9])年([0-9][0-9]?)月$', 'y', 'm', 'd'},
+	['年'] = {'^([0-9][0-9][0-9][0-9])年$', 'y', 'm', 'd'},
+	-- END LOCAL
 	 																			-- year-initial numerical year-month-day
 	['ymd'] = {'^(%d%d%d%d)%-(%d%d)%-(%d%d)$', 'y', 'm', 'd'},					
 																				-- month-initial: month day, year
@@ -448,6 +453,9 @@ set, the editor intended to embargo a PMC but |pmc-embargo-date= does not hold a
 
 local function is_valid_embargo_date (v)
 	if v:match (patterns['ymd'][1]) or											-- ymd
+		-- LOCAL: Handle Cantonese dates
+		mw.ustring.match (v, patterns['年月日'][1]) or										-- ymd
+		--END LOCAL
 		v:match (patterns['Mdy'][1]) or											-- dmy
 		v:match (patterns['dMy'][1]) then										-- mdy
 			return true, v;
@@ -492,6 +500,25 @@ local function check_date (date_string, param, tCOinS_date)
 		year, month, day = date_string:match (patterns['ymd'][1]);
 		if 12 < tonumber(month) or 1 > tonumber(month) or 1582 > tonumber(year) or 0 == tonumber(day) then return false; end	-- month or day number not valid or not Gregorian calendar
 		anchor_year = year;
+	
+	-- LOCAL: Handle Cantonese dates
+	elseif mw.ustring.match (date_string, patterns['年月日'][1]) then
+		year, month, day = mw.ustring.match (date_string, patterns['年月日'][1]);
+		if 12 < tonumber(month) or 1 > tonumber(month) or 1582 > tonumber(year) or 0 == tonumber(day) then return false; end	-- month or day number not valid or not Gregorian calendar
+		anchor_year = year;
+
+	elseif mw.ustring.match(date_string, patterns['年月'][1]) then
+		year, month = mw.ustring.match(date_string, patterns['年月'][1]);
+		if not is_valid_year(year) then return false; end
+		if 12 < tonumber(month) or 1 > tonumber(month) then return false; end
+		anchor_year = year;
+
+	elseif mw.ustring.match(date_string, patterns['年'][1]) then
+		year = mw.ustring.match(date_string, patterns['年'][1]);
+		if not is_valid_year(year) then return false; end
+		anchor_year = year;
+
+	-- END LOCAL
 	
 	elseif mw.ustring.match(date_string, patterns['Mdy'][1]) then				-- month-initial: month day, year
 		month, day, anchor_year, year = mw.ustring.match(date_string, patterns['Mdy'][1]);
