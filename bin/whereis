@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+# vi:set sw=3 ai sm:
+use strict;
+
+sub find_source_files () {
+   my @cmd = qw(find Module -type f);
+   my $input = open(INPUT, '-|');
+   my @it;
+   die "$cmd[0]: fork: $!\n" unless defined $input;
+   if (!$input) {
+      exec { $cmd[0] } @cmd;
+      die "$cmd[0]: exec: $!\n";
+   }
+   for (;;) {
+      my $s = scalar <INPUT>;
+   last unless defined $s;
+      chomp $s;
+      push @it, $s;
+   }
+   return @it;
+}
+
+my @cmd = find_source_files;
+die "No source files found\n" unless @cmd;
+die "No search target specified\n" unless @ARGV;
+@cmd = ('grep', join(' ', @ARGV), @cmd);
+exec { $cmd[0] } @cmd;
+die "$cmd[0]: exec: $!\n";
