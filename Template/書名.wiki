@@ -1,0 +1,4 @@
+<onlyinclude>{{#invoke:書名|Syu1meng2|{{{1}}}|type={{{type}}}}}</onlyinclude><noinclude>
+{{Documentation}}
+</noinclude>
+
