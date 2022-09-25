@@ -15,7 +15,9 @@ local identifiers;																-- functions and tables in Module:Citation/CS1
 local metadata;																	-- functions in Module:Citation/CS1/COinS
 local cfg = {};																	-- table of configuration tables that are defined in Module:Citation/CS1/Configuration
 local whitelist = {};															-- table of tables listing valid template parameter names; defined in Module:Citation/CS1/Whitelist
-
+-- LOCAL
+local region_table;
+-- END LOCAL
 
 --[[------------------< P A G E   S C O P E   V A R I A B L E S >---------------
 
@@ -1576,16 +1578,40 @@ local function name_tag_get (lang_param)
 	end
 
 	name = cfg.mw_languages_by_tag_t[lang_param_lc];							-- assume that <lang_param_lc> is a tag; attempt to get its matching language name
+	-- LOCAL: If what we get looks like English, save it for later analysis then nuke it
+	local attr;
+	local candidate5;
+	if name and mw.ustring.match(name, '^[ -~]+$') then
+		candidate5 = name;
+		name = nil;
+	end
+	-- END LOCAL
 	
 	if name then
 		return name, lang_param_lc;												-- <lang_param_lc> is a tag so return it and <name>
 	end
 	
+	-- LOCAL
+	if 0 then
+	-- END LOCAL
 	tag = lang_param_lc:match ('^(%a%a%a?)%-.*');								-- is <lang_param_lc> an IETF-like tag that MediaWiki doesn't recognize? <tag> gets the language subtag; nil else
+	-- LOCAL
+	end
+	tag, attr = lang_param_lc:match ('^(%a%a%a?)%-(.*)');						-- is <lang_param_lc> an IETF-like tag that MediaWiki doesn't recognize? <tag> gets the language subtag; nil else
+	-- END LOCAL
 
 	if tag then
 		name = cfg.mw_languages_by_tag_t[tag];									-- attempt to get a language name using the shortened <tag>
 		if name then
+			-- LOCAL: do final analysis on which name to use
+			if mw.ustring.match(name, '^[ -~]+$') and candidate5 then			-- if it looks like English but we got something earlier
+				return candidate5;												-- then use the earlier result
+			end
+			if attr and region_table[attr] then
+				name = region_table[attr][1] .. name;
+				attr = nil;
+			end
+			-- END LOCAL
 			return name, tag;													-- <lang_param_lc> is an unrecognized IETF-like tag so return <name> and language subtag
 		end
 	end
@@ -4094,6 +4120,12 @@ local function citation(frame)
 	identifiers = require ('Module:Citation/CS1/Identifiers' .. sandbox);
 	metadata = require ('Module:Citation/CS1/COinS' .. sandbox);
 	styles = 'Module:Citation/CS1' .. sandbox .. '/styles.css';
+	-- LOCAL: load IANA regions from the Lang modulee
+	local lang_data =  mw.loadData ('Module:Lang/data');
+	if lang_data then
+		region_table = lang_data.lang_name_table.region;
+	end
+	-- END LOCAL
 
 	utilities.set_selected_modules (cfg);										-- so that functions in Utilities can see the selected cfg tables
 	identifiers.set_selected_modules (cfg, utilities);							-- so that functions in Identifiers can see the selected cfg tables and selected Utilities module
