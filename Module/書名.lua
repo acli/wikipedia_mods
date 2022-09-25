@@ -144,6 +144,19 @@ local function build_type_2_citable( work, part )
 	return it;
 end
 
+-- Check if the given string is (believed to be) CJK
+local function cjk_p( s )
+	return mw.ustring.match(s, '^['
+			.. '⺀-䶿'								-- 2E80-4DBF
+			.. '一-鿿'								-- 4E00-9FFF
+			.. '가-힯'								-- AC00-D7AF
+			.. '豈-﫿'								-- F900-FAFF
+			.. '︰-﹏'								-- FE30-FE4F
+			.. '！-｠'								-- FF01-FF60
+			.. '𠀀-𯨟'								-- 20000-2FA1F
+			.. ']+$');
+end
+
 -- Analyze the given title(s) and decide if type 1 is safe to use
 local function determine_which_type_to_use( work, part )
 	local type;
@@ -157,15 +170,7 @@ local function determine_which_type_to_use( work, part )
 	else
 		det = '';
 	end
-	if mw.ustring.match(det, '^['
-			.. '⺀-䶿'								-- 2E80-4DBF
-			.. '一-鿿'								-- 4E00-9FFF
-			.. '가-힯'								-- AC00-D7AF
-			.. '豈-﫿'								-- F900-FAFF
-			.. '︰-﹏'								-- FE30-FE4F
-			.. '！-｠'								-- FF01-FF60
-			.. '𠀀-𯨟'								-- 20000-2FA1F
-			.. ']+$') then
+	if cjk_p(det) then
 		type = '1';
 	else
 		type = '2';
