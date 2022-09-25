@@ -432,19 +432,19 @@ local function wrap_style (key, str)
 	end
 
 	-- LOCAL: CJK titles should never be italicized. Check if str looks CJK
-	local cjk_p = key['language'] ~= nil and (
-				key['language']:match('^ja')
-			 or	key['language']:match('^ko')
-			 or	key['language']:match('^yue')
-			 or	key['language']:match('^zh'))
-			 or	cjk_p(str)
-			 or	predominantly_cjk_p(str);
+	local cjk_p = cjk_p(str) or	predominantly_cjk_p(str);
 	if cjk_p then
 		-- It would be ideal to use Module:書名 to format this but
 		-- that does not seem to be possible. Further investigation needed.
-		return '<span class=syu1ming4><span class=hoi1>《</span>'
-				.. str ..
-				'<span class=saan1>》</span></span>'
+		if in_array (key, {'italic-title', 'trans-italic-title'}) then
+			return '<span class=syu1ming4><span class=hoi1>《</span>'
+					.. str ..
+					'<span class=saan1>》</span></span>'
+		elseif in_array (key, {'quoted-title', 'trans-quoted-title'}) then
+			return '<span class=pin1ming4><span class=hoi1>〈</span>'
+					.. str ..
+					'<span class=saan1>〉</span></span>'
+		end
 	end
 	-- END LOCAL
 	return substitute (cfg.presentation[key], {str});
