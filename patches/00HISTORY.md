@@ -2,6 +2,11 @@
 <tr><th>Patch<th>Purpose<th>Status
 
 <tr><td scope=row>
+20220925_FOREIGN.md
+<td>Do not mark zh-HK or zh-Hant as foreign source
+<td>On hold (it works but seems pointless)
+
+<tr><td scope=row>
 20220925_CJK_TITLES
 <td>Disable italics (and add guillemets) for CJK titles
 <td>Committed to production
