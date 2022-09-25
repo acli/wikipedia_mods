@@ -2,6 +2,11 @@
 <tr><th>Patch<th>Purpose<th>Status
 
 <tr><td scope=row>
+20220925_CJK_TITLES
+<td>Disable italics (and add guillemets) for CJK titles
+<td>Committed to production
+
+<tr><td scope=row>
 20220922_EDITION
 <td>Handle year-based edition numbering
 <td>Committed to production
