@@ -115,6 +115,19 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 	padding-right: 0.2em;
 }
 
+/* LOCAL: CJK guillemet kerning. Copied from Module:書名 but -b, -adj removed */
+.pin1ming4 .hoi1,
+.syu1ming4 .hoi1 {
+	display: inline-block;
+	margin-left: -0.4em;
+}
+.pin1ming4 .saan1,
+.syu1ming4 .saan1 {
+	display: inline-block;
+	margin-right: -0.4em;
+}
+/* END LOCAL */
+
 /* selflinks – avoid bold font style when cs1|2 template links to the current page */
 .citation .mw-selflink {
 	font-weight: inherit;
