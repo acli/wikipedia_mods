@@ -1,5 +1,5 @@
 diff --git a/Module/Citation/CS1/Utilities.lua b/Module/Citation/CS1/Utilities.lua
-index c4da3dd..f06c44e 100644
+index c4da3dd..8cfde8d 100644
 --- a/Module/Citation/CS1/Utilities.lua
 +++ b/Module/Citation/CS1/Utilities.lua
 @@ -367,6 +367,63 @@ this function is similar to but separate from wrap_msg().
@@ -71,21 +71,40 @@ index c4da3dd..f06c44e 100644
  	end
  
 +	-- LOCAL: CJK titles should never be italicized. Check if str looks CJK
-+	local cjk_p = key['language'] ~= nil and (
-+				key['language']:match('^ja')
-+			 or	key['language']:match('^ko')
-+			 or	key['language']:match('^yue')
-+			 or	key['language']:match('^zh'))
-+			 or	cjk_p(str)
-+			 or	predominantly_cjk_p(str);
++	local cjk_p = cjk_p(str) or	predominantly_cjk_p(str);
 +	if cjk_p then
 +		-- It would be ideal to use Module:書名 to format this but
 +		-- that does not seem to be possible. Further investigation needed.
-+		return '<span class=syu1ming4><span class=hoi1>《</span>'
-+				.. str ..
-+				'<span class=saan1>》</span></span>'
++		if in_array (key, {'italic-title', 'trans-italic-title'}) then
++			return '<span class=syu1ming4><span class=hoi1>《</span>'
++					.. str ..
++					'<span class=saan1>》</span></span>'
++		elseif in_array (key, {'quoted-title', 'trans-quoted-title'}) then
++			return '<span class=pin1ming4><span class=hoi1>〈</span>'
++					.. str ..
++					'<span class=saan1>〉</span></span>'
++		end
 +	end
 +	-- END LOCAL
  	return substitute (cfg.presentation[key], {str});
  end
  
+diff --git a/patches/00HISTORY.md b/patches/00HISTORY.md
+index 7acf6d1..7fb1c3a 100644
+--- a/patches/00HISTORY.md
++++ b/patches/00HISTORY.md
+@@ -2,6 +2,11 @@
+ <tr><th>Patch<th>Purpose<th>Status
+ 
+ <tr><td scope=row>
++20220925_CJK_TITLES
++<td>Disable italics (and add guillemets) for CJK titles
++<td>Committed to production
++
++<tr><td scope=row>
+ 20220922_EDITION
+ <td>Handle year-based edition numbering
+ <td>Committed to production
+diff --git a/patches/20220925_CJK_TITLES.md b/patches/20220925_CJK_TITLES.md
+new file mode 100644
+index 0000000..e69de29
