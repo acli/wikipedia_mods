@@ -1,10 +1,12 @@
 -- vi:set sw=4 ts=4 ai sm:
--- This module implements the backend logic for displaying the two types
--- of ˈsyˌmiŋˍhou (punctuation mark for indicating the title of a citable
--- work in Chinese languages)
+---- This module implements the backend logic for displaying the two types
+---- of ˈsyˌmiŋˍhou (punctuation mark for indicating the title of a citable
+---- work in Chinese languages)
 
 require ('Module:No globals');
 local p = {};
+
+--- Debugging functions -------------------------------------------------------
 
 -- Stringify something to a form suitable for debugging and error messages
 local function cvs( s )
@@ -14,6 +16,8 @@ local function cvs( s )
 	return s;
 end
 
+--- Auxiliaries ---------------------------------------------------------------
+
 -- Return a sanitized version of an argument value
 local function sanitize( arg )
 	if arg ~= nil and arg:match('^{{{%w-}}}$') then
@@ -22,13 +26,23 @@ local function sanitize( arg )
 	return arg;
 end
 
+-- Canonicalize the type parameter
+local function canonicalize_type_value( type )
+	if type == '甲' then
+		type = '1'
+	elseif type == '乙' then
+		type = '2'
+	end
+	return type;
+end
+
 -- Return a value that should be suitable for use as an alt or aria-label
 -- and safe to use for double-quoting
 local function build_aria_label_from( s )
 	return	mw.ustring.gsub(
 			mw.ustring.gsub(
 			mw.ustring.gsub(s,
-				'<[^<>]*>', ''),												-- try to nuke tags
+				'<[^<>]*>', ''),					-- try to nuke tags
 				'"', '”'), 
 				"'", '’')
 end
@@ -39,7 +53,7 @@ local function build_type_1_part( s )
 	it = '';
 	for i = 1, mw.ustring.len(s), 1 do
 		local c = mw.ustring.sub(s, i, i);
-		it = it .. '<span class=zi6>' .. c .. '</span>';						-- wrap each character
+		it = it .. '<span class=zi6>' .. c .. '</span>';	-- wrap each char
 	end
 	return it;
 end
@@ -55,7 +69,7 @@ local function build_type_1_citable( work, part )
 		prefix = '〈';
 		suffix = '〉';
 		if work ~= nil then
-			infix = '・';														-- U+30FB
+			infix = '・';							-- U+30FB
 			part1 = build_type_1_part(work);
 			part2 = build_type_1_part(part);
 			class1 = 'syu1ming4';
@@ -86,11 +100,14 @@ local function build_type_1_citable( work, part )
 				.. part2
 				.. '</span>';
 
-		alt = prefix .. build_aria_label_from(part1 .. infix .. part2) .. suffix;
+		alt = prefix .. build_aria_label_from(part1..infix..part2) .. suffix;
 	elseif part1 ~= nil then
 		alt = prefix .. build_aria_label_from(part1) .. suffix;
 	end
-	it = mw.ustring.gsub(it, '(</span>)$', '<span class=saan1>' ..suffix .. '</span>%1');
+	it = mw.ustring.gsub(it,
+						'(</span>)$',
+						'<span class=saan1>' ..suffix .. '</span>%1');
+					
 	it = '<span aria-label="' .. alt .. '">' .. it .. '</span>';
 	return it;
 end
@@ -108,7 +125,7 @@ local function build_type_2_citable( work, part )
 		prefix = '〈';
 		suffix = '〉';
 		if work ~= nil then
-			root = work .. '・' .. part;										-- dot = U+30FB
+			root = work .. '・' .. part;			-- dot = U+30FB
 		else
 			root = part;
 		end
@@ -156,6 +173,8 @@ local function determine_which_type_to_use( work, part )
 	return type;
 end
 
+--- Exported, invocable functions ---------------------------------------------
+
 p.Syu1meng2 = function( frame )
 	local parent = frame:getParent();
 	local s1 = sanitize(parent.args[1]);
@@ -197,6 +216,8 @@ p.Syu1meng2 = function( frame )
 	-- if type=auto is requested, analyze the title(s) and choose 1 or 2
 	if type == 'auto' then
 		type = determine_which_type_to_use(work, part)
+	else
+		type = canonicalize_type_value(type);
 	end
 	
 	-- build it
@@ -204,10 +225,10 @@ p.Syu1meng2 = function( frame )
 		if error == nil then
 			error = '書名模出錯，搵唔到書名，又搵唔到篇名';
 		end
-	elseif type == '2' then														-- 乙式
-		it = build_type_2_citable(work, part)
-	elseif type == '1' then														-- 甲式
+	elseif type == '1' then							-- 甲式 (type 1)
 		it = build_type_1_citable(work, part)
+	elseif type == '2' then							-- 乙式 (type 2)
+		it = build_type_2_citable(work, part)
 	else
 		error = '唔明'..cvs(type)..'式書名號係乜';
 	end
