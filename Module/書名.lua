@@ -127,17 +127,47 @@ local function build_type_2_citable( work, part )
 	return it;
 end
 
+-- Analyze the given title(s) and decide if type 1 is safe to use
+local function determine_which_type_to_use( work, part )
+	local type;
+	local det;
+	if work ~= nil and part ~= nil then
+		det = work .. part;
+	elseif work ~= nil then
+		det = work;
+	elseif part ~= nil then
+		det = part;
+	else
+		det = '';
+	end
+	if mw.ustring.match(det, '^['
+			.. '⺀-䶿'								-- 2E80-4DBF
+			.. '一-鿿'								-- 4E00-9FFF
+			.. '가-힯'								-- AC00-D7AF
+			.. '豈-﫿'								-- F900-FAFF
+			.. '︰-﹏'								-- FE30-FE4F
+			.. '！-｠'								-- FF01-FF60
+			.. '𠀀-𯨟'								-- 20000-2FA1F
+			.. ']+$') then
+		type = '1';
+	else
+		type = '2';
+	end
+	return type;
+end
+
 p.Syu1meng2 = function( frame )
 	local parent = frame:getParent();
 	local s1 = sanitize(parent.args[1]);
 	local s2 = sanitize(parent.args[2]);
 	local title = sanitize(parent.args['title']);
 	local chapter = sanitize(parent.args['chapter']);
-	local type = frame.args['type'];
+	local type = sanitize(frame.args['type']);
 	local it;
 	local alt = '';
 	local styles = 'Module:書名/styles.css';
 	local work, part;
+	local error;
 	
 	-- figure out what is actually being marked up as a citable
 	if s1 ~= nil and s2 ~= nil then
@@ -161,20 +191,34 @@ p.Syu1meng2 = function( frame )
 	
 	-- fixup default type
 	if type == nil then
-		type = '1';
+		type = 'auto';
+	end
+	
+	-- if type=auto is requested, analyze the title(s) and choose 1 or 2
+	if type == 'auto' then
+		type = determine_which_type_to_use(work, part)
 	end
 	
 	-- build it
 	if work == nil and part == nil then
-		it = '書名模出錯，搵唔到書名，又搵唔到篇名（s1=' .. cvs(s1)
+		if error == nil then
+			error = '書名模出錯，搵唔到書名，又搵唔到篇名';
+		end
+	elseif type == '2' then														-- 乙式
+		it = build_type_2_citable(work, part)
+	elseif type == '1' then														-- 甲式
+		it = build_type_1_citable(work, part)
+	else
+		error = '唔明'..cvs(type)..'式書名號係乜';
+	end
+
+	if it == nil and error ~= nil then
+		it = '<span class=error>' .. error .. '</span>'
+			.. '（s1=' .. cvs(s1)
 			.. '，s2=' .. cvs(s2)
 			.. '，title=' .. cvs(title)
 			.. '，chapter=' .. cvs(chapter)
 			.. '）'
-	elseif type == '2' then														-- 乙式
-		it = build_type_2_citable(work, part)
-	else																		-- 甲式
-		it = build_type_1_citable(work, part)
 	end
 	
 	-- request our style sheet
