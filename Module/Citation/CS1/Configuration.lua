@@ -1031,6 +1031,7 @@ local lang_name_remap = {														-- used for |language=; names require pro
 	['bhojpuri'] = {'Bhojpuri', 'bho'},											-- MediaWiki uses 'bh' as a subdomain name for Bhojpuri Wikipedia: bh.wikipedia.org
 	['bihari'] = {'Bihari', 'bh'},												-- MediaWiki replaces 'Bihari' with 'Bhojpuri' so 'Bihari' cannot be found
 	['blackfoot'] = {'Blackfoot', 'bla'},										-- MediaWiki/IANA/ISO 639: Siksika; use en.wiki preferred name
+	['cantonese'] = {'Cantonese', 'yue'},
 	['colognian'] = {'Colognian', 'ksh-x-colog'},								-- MediaWiki preferred name for ksh
 	['ilocano'] = {'Ilocano', 'ilo'},											-- MediaWiki/IANA/ISO 639: Iloko; use en.wiki preferred name
 	['kolsch'] = {'Kölsch', 'ksh'},												-- use IANA/ISO 639 preferred name (use non-diacritical o instead of umlaut ö)
