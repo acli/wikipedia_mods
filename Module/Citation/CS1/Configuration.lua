@@ -1052,7 +1052,7 @@ Properties categories. These are used for investigating qualities of citations.
 local prop_cats = {
 	['foreign-lang-source'] = 'CS1$1語言來源 ($2)',					-- |language= categories; $1 is foreign-language name, $2 is ISO639-1 code
 	['foreign-lang-source-2'] = 'CS1外地語言來源 (ISO 639-2)|$1',	-- |language= category; a cat for ISO639-2 languages; $1 is the ISO 639-2 code used as a sort key
-	['jul-greg-uncertainty'] = 'CS1: Julian–Gregorian uncertainty',				-- probably temporary cat to identify scope of template with dates 1 October 1582 – 1 January 1926
+	['jul-greg-uncertainty'] = 'CS1: 年份分唔到係儒略曆定國瑞曆',				-- probably temporary cat to identify scope of template with dates 1 October 1582 – 1 January 1926
 	['local-lang-source'] = 'CS1用$1語言文字 ($2)',						-- |language= categories; $1 is local-language name, $2 is ISO639-1 code; not emitted when local_lang_cat_enable is false
 	['location-test'] = 'CS1 location test',
 	['long-vol'] = 'CS1: long volume value',									-- probably temporary cat to identify scope of |volume= values longer than 4 charachters
