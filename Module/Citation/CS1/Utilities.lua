@@ -437,13 +437,13 @@ local function wrap_style (key, str)
 		-- It would be ideal to use Module:書名 to format this but
 		-- that does not seem to be possible. Further investigation needed.
 		if in_array (key, {'italic-title', 'trans-italic-title'}) then
-			return '<span class=syu1ming4><span class=hoi1>《</span>'
+			return '<span class=syu1ming4-b><span class=hoi1-adj>《</span>'
 					.. str ..
-					'<span class=saan1>》</span></span>'
+					'<span class=saan1-adj>》</span></span>'
 		elseif in_array (key, {'quoted-title', 'trans-quoted-title'}) then
-			return '<span class=pin1ming4><span class=hoi1>〈</span>'
+			return '<span class=pin1ming4-b><span class=hoi1-adj>〈</span>'
 					.. str ..
-					'<span class=saan1>〉</span></span>'
+					'<span class=saan1-adj>〉</span></span>'
 		end
 	end
 	-- END LOCAL

@@ -116,13 +116,13 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 }
 
 /* LOCAL: CJK guillemet kerning. Copied from Module:書名 but -b, -adj removed */
-.pin1ming4 .hoi1,
-.syu1ming4 .hoi1 {
+.pin1ming4-b .hoi1-adj,
+.syu1ming4-b .hoi1-adj {
 	display: inline-block;
 	margin-left: -0.4em;
 }
-.pin1ming4 .saan1,
-.syu1ming4 .saan1 {
+.pin1ming4-b .saan1-adj,
+.syu1ming4-b .saan1-adj {
 	display: inline-block;
 	margin-right: -0.4em;
 }
