@@ -144,12 +144,14 @@ local function build_type_2_citable( work, part )
 		suffix = '》';
 		root = work;
 	end
-	local alt = prefix .. build_aria_label_from(root) .. suffix;
-	prefix = '<span class=hoi1-adj>' .. prefix .. '</span>';
-	suffix = '<span class=saan1-adj>'.. suffix .. '</span>';
-	it = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
-			.. prefix .. root .. suffix 
-			.. '</span>';
+	if root ~= nil then
+		local alt = prefix .. build_aria_label_from(root) .. suffix;
+		prefix = '<span class=hoi1-adj>' .. prefix .. '</span>';
+		suffix = '<span class=saan1-adj>'.. suffix .. '</span>';
+		it = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
+				.. prefix .. root .. suffix 
+				.. '</span>';
+	end
 	return it;
 end
 
