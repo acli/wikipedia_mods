@@ -104,11 +104,13 @@ local function build_type_1_citable( work, part )
 	elseif part1 ~= nil then
 		alt = prefix .. build_aria_label_from(part1) .. suffix;
 	end
-	it = mw.ustring.gsub(it,
-						'(</span>)$',
-						'<span class=saan1>' ..suffix .. '</span>%1');
+	if it ~= nil then
+		it = mw.ustring.gsub(it,
+							'(</span>)$',
+							'<span class=saan1>' ..suffix .. '</span>%1');
 					
-	it = '<span aria-label="' .. alt .. '">' .. it .. '</span>';
+		it = '<span aria-label="' .. alt .. '">' .. it .. '</span>';
+	end
 	return it;
 end
 
@@ -254,4 +256,11 @@ p.Syu1meng2 = function( frame )
 		});
 	return it;
 end
+
+--- Non-invocable internal functions exported for other modules to use --------
+
+p.cjk_p = cjk_p;
+p.determine_which_type_to_use = determine_which_type_to_use;
+p.build_type_1_citable = build_type_1_citable;
+p.build_type_2_citable = build_type_2_citable;
 return p;
