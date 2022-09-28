@@ -39,6 +39,9 @@ end
 -- Return a value that should be suitable for use as an alt or aria-label
 -- and safe to use for double-quoting
 local function build_aria_label_from( s )
+	if s == nil then
+		return s;
+	end
 	return	mw.ustring.gsub(
 			mw.ustring.gsub(
 			mw.ustring.gsub(s,
