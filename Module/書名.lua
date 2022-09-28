@@ -100,7 +100,11 @@ local function build_type_1_citable( work, part )
 				.. part2
 				.. '</span>';
 
-		alt = prefix .. build_aria_label_from(part1..infix..part2) .. suffix;
+		if part1 ~= nil then
+			alt = prefix .. build_aria_label_from(part1..infix..part2) .. suffix;
+		else
+			alt = prefix .. build_aria_label_from(part2) .. suffix;
+		end
 	elseif part1 ~= nil then
 		alt = prefix .. build_aria_label_from(part1) .. suffix;
 	end
