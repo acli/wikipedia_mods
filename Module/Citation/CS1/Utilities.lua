@@ -432,18 +432,23 @@ local function wrap_style (key, str)
 	end
 
 	-- LOCAL: CJK titles should never be italicized. Check if str looks CJK
-	local cjk_p = cjk_p(str) or	predominantly_cjk_p(str);
-	if cjk_p then
-		-- It would be ideal to use Module:書名 to format this but
-		-- that does not seem to be possible. Further investigation needed.
+	if cjk_p(str) or predominantly_cjk_p(str) then
+		local work, part;
 		if in_array (key, {'italic-title', 'trans-italic-title'}) then
-			return '<span class=syu1ming4-b><span class=hoi1-adj>《</span>'
-					.. str ..
-					'<span class=saan1-adj>》</span></span>'
+			work = str;
 		elseif in_array (key, {'quoted-title', 'trans-quoted-title'}) then
-			return '<span class=pin1ming4-b><span class=hoi1-adj>〈</span>'
-					.. str ..
-					'<span class=saan1-adj>〉</span></span>'
+			part = str;
+		end
+		local syu1meng2 = require('Module:書名');
+		local type = syu1meng2.determine_which_type_to_use(work, part);
+		local it;
+		if type == '1' then
+			it = syu1meng2.build_type_1_citable(work, part);
+		else
+			it = syu1meng2.build_type_2_citable(work, part);
+		end
+		if it ~= nil then
+			return it;
 		end
 	end
 	-- END LOCAL
