@@ -1661,7 +1661,15 @@ local function language_parameter (lang)
 --					utilities.add_prop_cat ('foreign-lang-source', {name, lang_subtag}, lang_subtag);		-- categorize it; tag appended to allow for multiple language categorization
 					utilities.add_prop_cat ('foreign-lang-source', {name, tag}, lang_subtag);		-- categorize it; tag appended to allow for multiple language categorization
 				else															-- or is a recognized language (but has a three-character tag)
+					-- LOCAL: don’t bother with unhelpful local-lang-source-2 if we got a name
+					if utilities.cjk_p(name) then
+						utilities.add_prop_cat ('foreign-lang-source', {name, tag}, lang_subtag);		-- categorize it; tag appended to allow for multiple language categorization
+					else
+					-- END LOCAL
 					utilities.add_prop_cat ('foreign-lang-source-2', {lang_subtag}, lang_subtag);			-- categorize it differently TODO: support multiple three-character tag categories per cs1|2 template?
+					-- LOCAL: don’t bother with unhelpful local-lang-source-2 if we got a name
+					end
+					-- END LOCAL
 				end
 			elseif cfg.local_lang_cat_enable then								-- when the language and this wiki's language are the same and categorization is enabled
 				utilities.add_prop_cat ('local-lang-source', {name, lang_subtag});		-- categorize it
