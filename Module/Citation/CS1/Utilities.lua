@@ -659,6 +659,10 @@ return {
 	strip_apostrophe_markup = strip_apostrophe_markup,
 	substitute = substitute,
 	wrap_style = wrap_style,
+	-- LOCAL: export local functions
+	cjk_p = cjk_p,
+	predominantly_cjk_p = predominantly_cjk_p,
+	-- END LOCAL
 
 	z = z,																		-- exported table
 	}
