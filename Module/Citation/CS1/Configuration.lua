@@ -559,7 +559,7 @@ local date_names = {
 		['long']	= {['January'] = 1, ['February'] = 2, ['March'] = 3, ['April'] = 4, ['May'] = 5, ['June'] = 6, ['July'] = 7, ['August'] = 8, ['September'] = 9, ['October'] = 10, ['November'] = 11, ['December'] = 12},
 		['short']	= {['Jan'] = 1, ['Feb'] = 2, ['Mar'] = 3, ['Apr'] = 4, ['May'] = 5, ['Jun'] = 6, ['Jul'] = 7, ['Aug'] = 8, ['Sep'] = 9, ['Oct'] = 10, ['Nov'] = 11, ['Dec'] = 12},
 		['quarter'] = {['First Quarter'] = 33, ['Second Quarter'] = 34, ['Third Quarter'] = 35, ['Fourth Quarter'] = 36},
-		['season']	= {['Winter'] = 24, ['Spring'] = 21, ['Summer'] = 22, ['Fall'] = 23, ['Autumn'] = 23},
+		['season']	= {['冬'] = 24, ['春'] = 21, ['夏'] = 22, ['秋'] = 23},
 		['named']	= {['Easter'] = 98, ['Christmas'] = 99},
 		},
 	['inv_local_long'] = {},													-- used in date reformatting & translation; copy of date_names['local'].long where k/v are inverted: [1]='<local name>' etc.
