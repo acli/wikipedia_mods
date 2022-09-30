@@ -440,13 +440,7 @@ local function wrap_style (key, str)
 			part = str;
 		end
 		local syu1meng2 = require('Module:書名');
-		local type = syu1meng2.determine_which_type_to_use(work, part);
-		local it;
-		if type == '1' then
-			it = syu1meng2.build_type_1_citable(work, part);
-		else
-			it = syu1meng2.build_type_2_citable(work, part);
-		end
+		local it = syu1meng2.auto_build_citable(work, part);
 		if it ~= nil then
 			return it;
 		end
