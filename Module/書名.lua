@@ -192,6 +192,18 @@ local function determine_which_type_to_use( work, part )
 	return type;
 end
 
+-- Automatically select whether to build either a type 1 or type 2 citable
+local function auto_build_citable( work, part )
+	local type = determine_which_type_to_use(work, part);
+	local it;
+	if type == '1' then
+		it = build_type_1_citable(work, part);
+	else
+		it = build_type_2_citable(work, part);
+	end
+	return it;
+end
+
 --- Exported, invocable functions ---------------------------------------------
 
 p.Syu1meng2 = function( frame )
@@ -275,4 +287,5 @@ p.cjk_p = cjk_p;
 p.determine_which_type_to_use = determine_which_type_to_use;
 p.build_type_1_citable = build_type_1_citable;
 p.build_type_2_citable = build_type_2_citable;
+p.auto_build_citable = auto_build_citable;
 return p;
