@@ -158,6 +158,9 @@ end
 -- Check if the given string is (believed to be) CJK
 local function cjk_p( s )
 	return mw.ustring.match(s, '^['
+			.. '—'									-- 2014 (em dash)
+			.. '…'									-- 2026
+			.. '○'									-- 25CB (circle [not zero])
 			.. '⺀-䶿'								-- 2E80-4DBF
 			.. '一-鿿'								-- 4E00-9FFF
 			.. '가-힯'								-- AC00-D7AF
