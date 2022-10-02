@@ -10,8 +10,37 @@ local p = {};
 
 -- Stringify something to a form suitable for debugging and error messages
 local function cvs( s )
-	if s == nil then
-		s= '<b>null</b>';
+	if s == nil or s == false or s == true then
+		s= '<b>' .. tostring(s) .. '</b>';
+	elseif type(s) == 'string' then
+		s = '(' .. mw.ustring.gsub(s, '([()])', '\\%1') .. ')';
+	elseif type(s) == 'table' then
+		local array_p = true;
+		for i, v in ipairs(s) do
+			if type(i) ~= 'number' then
+				array_p = false;
+			end
+		end
+		local s2 = '';
+		if array_p then
+			for i = 1, #s, 1 do
+				if #s2 > 1 then
+					s2 = s2 .. ' ';
+				end
+				s2 = s2 .. cvs(s[i]);
+			end
+			s2 = '[' .. s2 .. ']';
+		else
+			for i, v in ipairs(s) do
+				if #s2 > 1 then
+					s2 = s2 .. ' ';
+				end
+				s2 = s2 .. cvs(i);
+				s2 = s2 .. ' ' .. cvs(v);
+			end
+			s2 = '{' .. s2 .. '}';
+		end
+		s = s2;
 	end
 	return s;
 end
@@ -51,13 +80,31 @@ local function build_aria_label_from( s )
 end
 
 -- Build a type 1 part (not necessarily the entire title)
+-- Try to construct the final HTML so that it line wrap correctly
+-- while also following kinsokushori rules
 local function build_type_1_part( s )
 	local it;
+	local stage1 = {};
+	local opening_p = false;
 	it = '';
 	for i = 1, mw.ustring.len(s), 1 do
 		local c = mw.ustring.sub(s, i, i);
-		it = it .. '<span class=zi6>' .. c .. '</span>';	-- wrap each char
+		if opening_p or (#stage1 > 0 and mw.ustring.match('[》〉｣」』]', c)) then
+			table.insert(stage1[#stage1], c);
+		else
+			table.insert(stage1, {c});
+		end
+		opening_p = mw.ustring.match('[《〈｢「『]', c);
 	end
+	for i = 1, #stage1, 1 do
+		local stage2 = stage1[i];
+		it = it .. '<span class=zit3>' .. '<span class=zit3>';
+		for j = 1, #stage2, 1 do
+			it = it .. '<span class=zi6>' .. stage2[j] .. '</span>';
+		end
+		it = it .. '</span>' .. '</span>';
+	end
+	--it = 'DEBUG: stage1 = ' .. cvs(stage1) .. '<br>→ it = ' .. cvs(it); 
 	return it;
 end
 
@@ -283,6 +330,7 @@ end
 
 --- Non-invocable internal functions exported for other modules to use --------
 
+p.cvs = cvs;
 p.cjk_p = cjk_p;
 p.determine_which_type_to_use = determine_which_type_to_use;
 p.build_type_1_citable = build_type_1_citable;
