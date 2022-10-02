@@ -120,7 +120,14 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .pin1ming4,
 .syu1ming4 {
   font-style: normal;
-  display: inline-flex;
+}
+.pin1ming4 .zit3,
+.syu1ming4 .zit3 {
+  display: inline-block;
+}
+.pin1ming4 .zit3 > .zit3,
+.syu1ming4 .zit3 > .zit3 {
+  display: flex;
 }
 .pin1ming4 .hoi1,
 .pin1ming4 .fan1gaak3,
@@ -130,6 +137,7 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .syu1ming4 .saan1 {
 	width: 0;
 	height: 0;
+	font-size: 0.1px;
 	color: transparent;
 }
 .pin1ming4 + .pin1ming4,
