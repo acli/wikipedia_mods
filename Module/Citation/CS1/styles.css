@@ -102,6 +102,9 @@ Set small text size in one place. 0.95 (here) * 0.9 (from references list) is
 ~0.85, which is the lower bound for size for accessibility. Old styling for this
 was just 0.85. We could write the rule so that when this template is inside
 references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
+/* LOCAL: used by Harvard style (refbegin)) */
+.references-small,
+/* END LOCAL */
 .cs1-format {
 	font-size: 95%;
 }
@@ -165,13 +168,22 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 /* Type B */
 .pin1ming4-b .hoi1-adj,
 .syu1ming4-b .hoi1-adj {
-	display: inline-block;
 	margin-left: -0.4em;
 }
 .pin1ming4-b .saan1-adj,
 .syu1ming4-b .saan1-adj {
-	display: inline-block;
 	margin-right: -0.4em;
+}
+/* END LOCAL */
+
+/* LOCAL: make Harvard style bibliographies look less weird (easier to read) */
+.references-small > ul {
+	margin-left: 0;
+}
+.references-small > ul > li {
+	margin-left: 3em;
+	text-indent: -3em;
+	list-style: none;
 }
 /* END LOCAL */
 
