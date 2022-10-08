@@ -404,6 +404,7 @@ local patterns = {
 	['年月'] = {'^(([0-9][0-9][0-9][0-9]))年([0-9][0-9]?)月$', 'a', 'y', 'm'},
 	['年'] = {'^(([0-9][0-9][0-9][0-9]))年$', 'a', 'y'},
 	['年季'] = {'^(([0-9][0-9][0-9][0-9]))年([春夏秋冬])[天季]?$'},
+	['年月月'] = {'^(([0-9][0-9][0-9][0-9]))年([0-9][0-9]?)[-–—~至]([0-9][0-9]?)月$', 'a', 'y', 'm', 'm2'},
 	-- END LOCAL
 	 																			-- year-initial numerical year-month-day
 	['ymd'] = {'^(%d%d%d%d)%-(%d%d)%-(%d%d)$', 'y', 'm', 'd'},					
@@ -520,6 +521,12 @@ local function check_date (date_string, param, tCOinS_date)
 		anchor_year, year, month = mw.ustring.match(date_string, patterns['年季'][1]);
 		if not is_valid_year(year) then return false; end
 		month = get_season_number(month, param);
+
+	elseif mw.ustring.match(date_string, patterns['年月月'][1]) then
+		anchor_year, year, month, month2 = mw.ustring.match(date_string, patterns['年月月'][1]);
+		if not is_valid_year(year) then return false; end
+		if 12 < tonumber(month) or 1 > tonumber(month) then return false; end
+		if 12 < tonumber(month2) or tonumber(month) >= tonumber(month2) then return false; end
 
 	-- END LOCAL
 	
