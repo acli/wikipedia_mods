@@ -16,7 +16,7 @@ local metadata;																	-- functions in Module:Citation/CS1/COinS
 local cfg = {};																	-- table of configuration tables that are defined in Module:Citation/CS1/Configuration
 local whitelist = {};															-- table of tables listing valid template parameter names; defined in Module:Citation/CS1/Whitelist
 -- LOCAL
-local region_table;
+local iana;
 -- END LOCAL
 
 --[[------------------< P A G E   S C O P E   V A R I A B L E S >---------------
@@ -1607,13 +1607,18 @@ local function name_tag_get (lang_param)
 			if mw.ustring.match(name, '^[ -~]+$') and candidate5 then			-- if it looks like English but we got something earlier
 				return candidate5;												-- then use the earlier result
 			end
-			if attr and region_table[attr] then
-				name = region_table[attr][1] .. name;
+			if attr and iana.region[attr] then
+				name = iana.region[attr][1] .. name;
 				attr = nil;
 			end
 			-- END LOCAL
 			return name, tag;													-- <lang_param_lc> is an unrecognized IETF-like tag so return <name> and language subtag
 		end
+	-- LOCAL: still no match. maybe it's a spoken or *rare* languagee that mw doesn't know about
+	elseif iana.lang[lang_param_lc] then
+		name = iana.lang[lang_param_lc][1];
+		return name, lang_param_lc;
+	-- END LOCAL
 	end
 end
 
@@ -4131,8 +4136,12 @@ local function citation(frame)
 	styles = 'Module:Citation/CS1' .. sandbox .. '/styles.css';
 	-- LOCAL: load IANA regions from the Lang modulee
 	local lang_data =  mw.loadData ('Module:Lang/data');
-	if lang_data then
-		region_table = lang_data.lang_name_table.region;
+	local raw_langs = mw.loadData ('Module:Language/data/iana languages');
+	if lang_data and raw_langs then
+		iana = {
+			['region'] = lang_data.lang_name_table.region;
+			['lang'] = raw_langs.active;
+		};
 	end
 	-- END LOCAL
 
