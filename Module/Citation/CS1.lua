@@ -1170,7 +1170,15 @@ local function list_people (control, people, etal)
 							first = reduce_to_initials (first, i);				-- attempt to convert first name(s) to initials
 						end
 					end
+					-- LOCAL: 中文名唔好加逗號
+					if utilities.cjk_p(one) and utilities.cjk_p(first) then
+						one = one .. first;
+					else
+					-- END LOCAL
 					one = one .. namesep .. first;
+					-- LOCAL: 中文名唔好加逗號
+					end
+					-- END LOCAL
 				end
 			end
 			if utilities.is_set (person.link) then
