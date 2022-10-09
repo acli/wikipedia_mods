@@ -7,11 +7,13 @@
 }
 .pin1ming4 .zit3,
 .syu1ming4 .zit3,
+.zyun1ming4 .zit3,
 .zoek6zung6 .zit3 {
   display: inline-block;
 }
 .pin1ming4 .zit3 > .zit3,
 .syu1ming4 .zit3 > .zit3,
+.zyun1ming4 .zit3 > .zit3,
 .zoek6zung6 .zit3 > .zit3 {
   display: flex;
 }
@@ -27,14 +29,19 @@
 	font-size: 0.1px;
 	color: transparent;
 }
+.zyun1ming4 .fan1gaak3 {
+	font-size: 0.125px;
+}
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
-.syu1ming4 + .syu1ming4 {
+.syu1ming4 + .syu1ming4,
+.zyun1ming4 + .zyun1ming4 {
 	margin-left: 0.125em;
 }
 .pin1ming4 > .zi6:last-child:after,
-.syu1ming4 > .zi6:last-child:after {
+.syu1ming4 > .zi6:last-child:after,
+.zyun1ming4 > .zi6:last-child:after {
 	clip-path: inset(0 0.1em 0 0);
 }
 .fan1gaak3 + .zi6:after {
@@ -42,6 +49,7 @@
 }
 .pin1ming4 .zi6:after,
 .syu1ming4 .zi6:after,
+.zyun1ming4 .zi6:after,
 .zoek6zung6 .zi6:after {
   position: absolute;
   align-self: baseline;
@@ -51,6 +59,10 @@
 .syu1ming4 .zi6:after {
   padding-top: 1em;
   content: "﹋";
+}
+.zyun1ming4 .zi6:after {
+	padding-top: 1em;
+	content: "￣";
 }
 .zoek6zung6 .zi6:after {
   padding-top: 0.6em;
@@ -67,4 +79,7 @@
 .pin1ming4-b .saan1-adj,
 .syu1ming4-b .saan1-adj {
 	margin-right: -0.4em;
+}
+.zyun1ming4-b {
+	text-decoration: underline;
 }
