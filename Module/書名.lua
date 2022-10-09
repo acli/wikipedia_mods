@@ -272,6 +272,43 @@ local function build_type_2_citable( work, part )
 	return it;
 end
 
+-- Build a non-citable proper noun with, if needed, inner separator
+local function build_noncitable_proper( parts, use_dot_p )
+	local it;
+	local class = 'zyun1ming4';
+	local zwsp = '​';								-- U+200B
+	local zwnj = '‌';								-- U+200C
+	local prefix = zwsp;
+	local suffix = zwsp;
+	local infix = '・'								-- dot = U+30FB
+	local root;
+	local alt;
+	if not use_dot_p then
+		infix = zwnj;
+	end
+	if parts then
+		for k, v in pairs(parts) do
+			local part = parse_title(parts[k]);
+			if not root then
+				root = '';
+				alt = '';
+			else
+				root = root .. zwnj;
+				alt = alt .. infix;
+			end
+			root = root .. wrap_title(part);
+			alt = alt .. part.label;
+		end
+	end
+	if root ~= nil then
+		alt = build_aria_label_from(alt);
+		it = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
+				.. prefix .. root .. suffix 
+				.. '</span>';
+	end
+	return it;
+end
+
 -- Check if the given string is (believed to be) CJK
 local function cjk_p( s )
 	return mw.ustring.match(s, '^['
@@ -391,6 +428,44 @@ p.Syu1meng2 = function( frame )
 			.. '，s2=' .. cvs(s2)
 			.. '，title=' .. cvs(title)
 			.. '，chapter=' .. cvs(chapter)
+			.. '）'
+	end
+	
+	-- request our style sheet
+	it = table.concat ({
+			frame:extensionTag ('templatestyles', '', {src=styles}),
+			it
+		});
+	return it;
+end
+
+p.Zyun1ming4 = function( frame )
+	local parent = frame:getParent();
+	local s1 = sanitize(frame.args[1]);
+	local it;
+	local alt = '';
+	local styles = 'Module:書名/styles.css';
+	local error;
+	
+	-- build it
+	if s1 ~= nil then
+		s1 = parse_title(s1);
+		local alt = build_aria_label_from(s1['label']);
+		it = build_noncitable_proper(s1);
+		if it ~= nil then
+			it = '<span class=zyun1ming4 aria-label="' .. alt .. '">'
+				.. it
+				.. '</span>';
+		end
+	else
+		if error == nil then
+			error = '專名模出錯，搵唔到有乜嘢名';
+		end
+	end
+
+	if it == nil and error ~= nil then
+		it = '<span class=error>' .. error .. '</span>'
+			.. '（s1=' .. cvs(s1)
 			.. '）'
 	end
 	
