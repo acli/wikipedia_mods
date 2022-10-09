@@ -81,5 +81,8 @@
 	margin-right: -0.4em;
 }
 .zyun1ming4-b {
-	text-decoration: underline;
+	/* text-decoration: underline;
+	text-underline-offset: 0.2em; /* XXX this works, but mw will nuke it */
+	white-space: nowrap; 
+	border-bottom: 0.05em solid currentColor;
 }
