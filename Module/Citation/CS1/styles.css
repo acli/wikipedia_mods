@@ -118,18 +118,22 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 	padding-right: 0.2em;
 }
 
-/* LOCAL: CJK ˈsyˌmingˍhou handling. Copied from Module:書名 */
+/* LOCAL: CJK ˈsyˌmingˍhou handling. Should be an exact copy of Module:書名/styles.css */
+/* adapted for Wikipedia */
+
 /* Type A */
 .pin1ming4,
 .syu1ming4 {
   font-style: normal;
 }
 .pin1ming4 .zit3,
-.syu1ming4 .zit3 {
+.syu1ming4 .zit3,
+.zoek6zung6 .zit3 {
   display: inline-block;
 }
 .pin1ming4 .zit3 > .zit3,
-.syu1ming4 .zit3 > .zit3 {
+.syu1ming4 .zit3 > .zit3,
+.zoek6zung6 .zit3 > .zit3 {
   display: flex;
 }
 .pin1ming4 .hoi1,
@@ -138,6 +142,7 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .syu1ming4 .hoi1,
 .syu1ming4 .fan1gaak3,
 .syu1ming4 .saan1 {
+	display: inline-block;
 	width: 0;
 	height: 0;
 	font-size: 0.1px;
@@ -147,7 +152,7 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
 .syu1ming4 + .syu1ming4 {
-	margin-left: 0.25em;
+	margin-left: 0.125em;
 }
 .pin1ming4 > .zi6:last-child:after,
 .syu1ming4 > .zi6:last-child:after {
@@ -157,12 +162,22 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 	clip-path: inset(0 0 0 0.1em);
 }
 .pin1ming4 .zi6:after,
-.syu1ming4 .zi6:after {
+.syu1ming4 .zi6:after,
+.zoek6zung6 .zi6:after {
   position: absolute;
-  padding-top: 1em;
   align-self: baseline;
-  content: "﹋";
   margin-left: -1em;
+}
+.pin1ming4 .zi6:after,
+.syu1ming4 .zi6:after {
+  padding-top: 1em;
+  content: "﹋";
+}
+.zoek6zung6 .zi6:after {
+  padding-top: 0.6em;
+  content: "·";
+  width: 1em;
+  text-align: center;
 }
 
 /* Type B */
