@@ -21,6 +21,7 @@
 .syu1ming4 .hoi1,
 .syu1ming4 .fan1gaak3,
 .syu1ming4 .saan1 {
+	display: inline-block;
 	width: 0;
 	height: 0;
 	font-size: 0.1px;
@@ -30,7 +31,7 @@
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
 .syu1ming4 + .syu1ming4 {
-	margin-left: 0.25em;
+	margin-left: 0.125em;
 }
 .pin1ming4 > .zi6:last-child:after,
 .syu1ming4 > .zi6:last-child:after {
@@ -52,18 +53,18 @@
   content: "﹋";
 }
 .zoek6zung6 .zi6:after {
-  padding-top: 0.75em;
-  content: "・"; /* U+30FB */
+  padding-top: 0.6em;
+  content: "·";
+  width: 1em;
+  text-align: center;
 }
 
 /* Type B */
 .pin1ming4-b .hoi1-adj,
 .syu1ming4-b .hoi1-adj {
-	display: inline-block;
 	margin-left: -0.4em;
 }
 .pin1ming4-b .saan1-adj,
 .syu1ming4-b .saan1-adj {
-	display: inline-block;
 	margin-right: -0.4em;
 }
