@@ -2,11 +2,41 @@
 ---- This module implements the backend logic for displaying the two types
 ---- of ˈsyˌmiŋˍhou (punctuation mark for indicating the title of a citable
 ---- work in Chinese languages)
+---- It has also been modified to deal with ˍdzœkˍdzuŋˍhou (emphasis marks,
+---- which unfortunately needs to be dealt with despite being a standard part
+---- of CSS) and also some experimental support for ˈdzynˌmiŋˍhou (punctuation
+---- mark for indicating personal and geographical names)
 
 require ('Module:No globals');
 local p = {};
 
 --- Debugging functions -------------------------------------------------------
+
+-- Figure out if a thing is an array
+local function array_p( thing )
+	local it = (type(thing) == 'table');
+	if it then
+		local i_min, i_max;
+		for i, v in pairs(thing) do
+			if type(i) ~= 'number' then
+				it = false;
+			else
+				if i_min == nil or i < i_min then
+					i_min = i;
+				end
+				if i_max == nil or i > i_max then
+					i_max = i;
+				end
+			end
+		end
+		-- in PostScript array indexes start at 0, but in Lua they start at 1
+		-- in addition, Lua "sequences" cannot contain nils (ignoring for now)
+		if it and not (i_min and i_min == 1 and i_max == #thing) then
+			it = false;				-- index has holes, not a real array
+		end
+	end
+	return it;
+end
 
 -- Stringify something into a form suitable for debugging and error messages
 -- (cvs is the name of the Postscript operator that does this)
@@ -16,14 +46,8 @@ local function cvs( s )
 	elseif type(s) == 'string' then
 		s = '(' .. mw.ustring.gsub(s, '([()])', '\\%1') .. ')';
 	elseif type(s) == 'table' then
-		local array_p = true;
-		for i, v in pairs(s) do
-			if type(i) ~= 'number' then
-				array_p = false;
-			end
-		end
 		local s2 = '';
-		if array_p then
+		if array_p(s) then
 			for i = 1, #s, 1 do
 				if #s2 > 0 then
 					s2 = s2 .. ' ';
@@ -43,7 +67,7 @@ local function cvs( s )
 				end
 				s2 = s2 .. ' ' .. cvs(v);
 			end
-			s2 = '{' .. s2 .. '}';
+			s2 = '<<' .. s2 .. '>>';
 		end
 		s = s2;
 	end
@@ -70,10 +94,32 @@ local function canonicalize_type_value( type )
 	return type;
 end
 
+-- Try to guess what REALLY is the thing, in the context of this module.
+-- Like Lisp or Perl, Lua has no real concept of classes, but unlike Perl
+-- there's no way to "bless" an array (table in Lua) into a class.
+-- So everything is just a generic table - a most non-ideal situation.
+-- (ref is the name of the Perl operator that does this)
+local function ref( thing )
+	local it = type(thing);
+	if thing == nil then
+		it = nil
+	elseif it == 'table' then
+		-- Are we looking at a parsed title?
+		if thing['label'] and type(thing['label']) == 'string' then
+			it = 'parsed-title';
+		-- Are we looking at an array?
+		elseif array_p(thing) then
+			it = 'array'
+		end
+	end
+	return it;
+end
+
 -- Analyze the title and see if it's a link of some kind
 local function parse_title( s )
 	local it = s;
-	if type(s) == 'string' then
+	local t = ref(s);
+	if t == 'string' then
 		local label, link, url;
 		link, label = mw.ustring.match(s, '^%[%[%s*([^%[][^%[]*)%s*|%s*([^%[%]]*)%s*%]%]$');
 		if link then
@@ -96,6 +142,8 @@ local function parse_title( s )
 			['link'] = link;
 			['url'] = url;
 		};
+	elseif t and t ~= 'parsed-title' then
+		error('parse-title got unexpected argument '..cvs(s) .. ' (t=' .. cvs(t) .. ')', 2);
 	end
 	return it;
 end
@@ -145,6 +193,7 @@ local function build_type_1_part( s )
 	local stage1 = {};
 	local opening_p = false;
 	s = parse_title(s);
+	assert(ref(s) == 'parsed-title')
 	it = '';
 	for i = 1, mw.ustring.len(s['label']), 1 do
 		local c = mw.ustring.sub(s['label'], i, i);
@@ -275,8 +324,8 @@ local function build_type_2_citable( work, part )
 	return it;
 end
 
--- Build a non-citable proper noun with, if needed, inner separator
-local function build_noncitable_proper( parts, use_dot_p )
+-- Build a non-citable proper noun using CSS underlining or borders
+local function build_noncitable_proper_simple( parts, use_dot_p )
 	local it;
 	local class = 'zyun1ming4';
 	local zwsp = '​';								-- U+200B
@@ -305,7 +354,45 @@ local function build_noncitable_proper( parts, use_dot_p )
 			root = root .. segment;
 		end
 	end
-	it = root;
+	it = '<span class=zyun1ming4-b>'
+		.. root
+		.. '</span>';
+	return it;
+end
+
+-- Attempt to build a non-citable proper noun using Unicode
+local function build_noncitable_proper_alternate( parts, use_dot_p )
+	local it;
+	local class = 'zyun1ming4';
+	local zwsp = '​';								-- U+200B
+	local zwnj = '‌';								-- U+200C
+	local infix = '・'								-- dot = U+30FB
+	local root;
+	local alt;
+	if not use_dot_p then
+		infix = zwnj;
+	end
+	if parts then
+		for k, v in pairs(parts) do
+			local part = parse_title(parts[k]);
+			if not root then
+				root = '';
+				alt = '';
+			else
+				root = root .. zwnj;
+				alt = alt .. infix;
+			end
+			local segment = build_type_1_part(part);
+			alt = build_aria_label_from(part.label);
+			segment = '<span class = "' .. class .. '" aria-label="' .. alt .. '">' 
+					.. segment 
+					.. '</span>';
+			root = root .. segment;
+		end
+	end
+	it = '<span class=zyun1ming4>'
+		.. root
+		.. '</span>';
 	return it;
 end
 
@@ -329,8 +416,11 @@ end
 local function determine_which_type_to_use( work, part )
 	local it;
 	local det;
-	if type(work) == 'table' then
+	local t = ref(work);
+	if t == 'parsed-title' then
 		work = work['label'];
+	elseif t == 'array' then
+		work = table.concat(work);
 	end
 	if type(part) == 'table' then
 		part = part['label'];
@@ -360,6 +450,18 @@ local function auto_build_citable( work, part )
 		it = build_type_1_citable(work, part);
 	else
 		it = build_type_2_citable(work, part);
+	end
+	return it;
+end
+
+-- Automatically select whether to build noncitable with Unicode or underlining
+local function auto_build_noncitable( parts )
+	local type = determine_which_type_to_use(parts);
+	local it;
+	if type == '1' then
+		it = build_noncitable_proper_alternate(parts);
+	else
+		it = build_noncitable_proper_simple(parts);
 	end
 	return it;
 end
@@ -461,12 +563,7 @@ p.Zyun1ming4 = function( frame )
 
 	-- build it
 	if parts ~= nil then
-		it = build_noncitable_proper(parts);
-		if it ~= nil then
-			it = '<span class=zyun1ming4>'
-				.. it
-				.. '</span>';
-		end
+		it = auto_build_noncitable(parts);
 	else
 		if error == nil then
 			error = '專名模出錯，搵唔到有乜嘢名';
@@ -528,7 +625,9 @@ end
 --- Non-invocable internal functions exported for other modules to use --------
 
 p.cvs = cvs;
+p.ref = ref;
 p.cjk_p = cjk_p;
+p.array_p = array_p;
 p.determine_which_type_to_use = determine_which_type_to_use;
 p.build_type_1_citable = build_type_1_citable;
 p.build_type_2_citable = build_type_2_citable;
