@@ -209,7 +209,11 @@ local function build_type_1_part( s )
 		local stage2 = stage1[i];
 		it = it .. '<span class=zit3>' .. '<span class=zit3>';
 		for j = 1, #stage2, 1 do
-			it = it .. '<span class=zi6>' .. stage2[j] .. '</span>';
+			local class = 'zi6';
+			if j == #stage2 then
+				class = 'hai2zeoi3mei1ge3 '..class;
+			end
+			it = it .. '<span class="'..class..'">' .. stage2[j] .. '</span>';
 		end
 		it = it .. '</span>' .. '</span>';
 	end
