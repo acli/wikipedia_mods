@@ -35,9 +35,12 @@
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
-.syu1ming4 + .syu1ming4,
-.zyun1ming4 + .zyun1ming4 {
+.syu1ming4 + .syu1ming4 {
 	margin-left: 0.125em;
+}
+.zyun1ming4-b + .zyun1ming4-b,
+.zyun1ming4 + .zyun1ming4 {
+	margin-left: 0.1em;
 }
 .pin1ming4 > .zi6:last-child:after,
 .syu1ming4 > .zi6:last-child:after,
