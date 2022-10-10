@@ -105,7 +105,7 @@ local function ref( thing )
 		it = nil
 	elseif it == 'table' then
 		-- Are we looking at a parsed title?
-		if thing['label'] and type(thing['label']) == 'string' then
+		if thing.label and type(thing.label) == 'string' then
 			it = 'parsed-title';
 		-- Are we looking at an array?
 		elseif array_p(thing) then
@@ -149,12 +149,13 @@ local function parse_title( s )
 end
 
 -- Inverse of parse_title: Try to reconstruct a wikified link given its parse
-local function wrap_title( label, link, url )
+-- This does not seem to actually work
+local function linkify_title( label, link, url )
 	local it;
 	if type(label) == 'table' then
-		link = label['link'];
-		url = label['url'];
-		label = label['label'];
+		link = label.link;
+		url = label.url;
+		label = label.label;
 	end
 	if label == nil then
 		-- all is lost
@@ -195,8 +196,8 @@ local function build_type_1_part( s )
 	s = parse_title(s);
 	assert(ref(s) == 'parsed-title')
 	it = '';
-	for i = 1, mw.ustring.len(s['label']), 1 do
-		local c = mw.ustring.sub(s['label'], i, i);
+	for i = 1, mw.ustring.len(s.label), 1 do
+		local c = mw.ustring.sub(s.label, i, i);
 		if opening_p or (#stage1 > 0 and mw.ustring.match('[》〉｣」』]', c)) then
 			table.insert(stage1[#stage1], c);
 		else
@@ -213,7 +214,7 @@ local function build_type_1_part( s )
 		it = it .. '</span>' .. '</span>';
 	end
 	--it = 'DEBUG: stage1 = ' .. cvs(stage1) .. '<br>→ it = ' .. cvs(it); 
-	it = wrap_title(it, s['link'], s['url']);
+	it = linkify_title(it, s.link, s.url);
 	return it;
 end
 
@@ -252,13 +253,13 @@ local function build_type_1_citable( work, part )
 	if part1 ~= nil then
 		it = it .. '<span class=' .. class1 .. '>'
 				.. '<span class=hoi1>' .. prefix .. '</span>'
-				.. wrap_title(part1)
+				.. linkify_title(part1)
 				.. '</span>';
 	end
 	if part2 ~= nil then
 		it = it .. '<span class=' .. class2 .. '>'
 				..' <span class=fan1gaak3>' .. infix .. '</span>'
-				.. wrap_title(part2)
+				.. linkify_title(part2)
 				.. '</span>';
 
 		if part1 ~= nil then
@@ -297,21 +298,21 @@ local function build_type_2_citable( work, part )
 		prefix = '〈';
 		suffix = '〉';
 		if work ~= nil then
-			root = wrap_title(work)
+			root = linkify_title(work)
 				.. '・'								-- dot = U+30FB
-				.. wrap_title(part);
+				.. linkify_title(part);
 
-			alt = work['label'] .. '・' .. part['label'];
+			alt = work.label .. '・' .. part.label;
 		else
-			root = wrap_title(part);
-			alt = part['label'];
+			root = linkify_title(part);
+			alt = part.label;
 		end
 	elseif work ~= nil then
 		class = 'syu1ming4';
 		prefix = '《';
 		suffix = '》';
-		root = work['label'];
-		alt = work['label'];
+		root = work.label;
+		alt = work.label;
 	end
 	if root ~= nil then
 		alt = prefix .. build_aria_label_from(alt) .. suffix;
@@ -346,7 +347,7 @@ local function build_noncitable_proper_simple( parts, use_dot_p )
 				root = root .. zwnj;
 				alt = alt .. infix;
 			end
-			local segment = wrap_title(part);
+			local segment = linkify_title(part);
 			alt = build_aria_label_from(part.label);
 			segment = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
 					.. segment 
@@ -418,12 +419,12 @@ local function determine_which_type_to_use( work, part )
 	local det;
 	local t = ref(work);
 	if t == 'parsed-title' then
-		work = work['label'];
+		work = work.label;
 	elseif t == 'array' then
 		work = table.concat(work);
 	end
 	if type(part) == 'table' then
-		part = part['label'];
+		part = part.label;
 	end
 	if work ~= nil and part ~= nil then
 		det = work .. part;
@@ -595,7 +596,7 @@ p.Zoek6zung6 = function( frame )
 	-- build it
 	if s1 ~= nil then
 		s1 = parse_title(s1);
-		local alt = build_aria_label_from(s1['label']);
+		local alt = build_aria_label_from(s1.label);
 		it = build_type_1_part(s1);
 		if it ~= nil then
 			it = '<span class=zoek6zung6 aria-label="' .. alt .. '">'
