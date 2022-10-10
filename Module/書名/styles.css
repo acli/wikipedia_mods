@@ -64,8 +64,11 @@
   content: "﹋";
 }
 .zyun1ming4 .zi6:after {
-	padding-top: 1em;
-	content: "￣";
+	/*padding-top: 1em;
+	content: "￣";*/
+	content: "︳";
+	transform-origin: bottom left;
+	transform: rotate(90deg) translate(-0.25em,0.35em);
 }
 .zoek6zung6 .zi6:after {
   padding-top: 0.6em;
