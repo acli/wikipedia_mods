@@ -126,6 +126,9 @@ local function build_aria_label_from( s )
 	if s == nil then
 		return s;
 	end
+	if type(s) ~= 'string' then
+		error('ERROR: build_aria_label got a non-string '..cvs(s), 2);
+	end
 	return	mw.ustring.gsub(
 			mw.ustring.gsub(
 			mw.ustring.gsub(s,
@@ -278,8 +281,6 @@ local function build_noncitable_proper( parts, use_dot_p )
 	local class = 'zyun1ming4';
 	local zwsp = '​';								-- U+200B
 	local zwnj = '‌';								-- U+200C
-	local prefix = zwsp;
-	local suffix = zwsp;
 	local infix = '・'								-- dot = U+30FB
 	local root;
 	local alt;
@@ -296,16 +297,15 @@ local function build_noncitable_proper( parts, use_dot_p )
 				root = root .. zwnj;
 				alt = alt .. infix;
 			end
-			root = root .. wrap_title(part);
-			alt = alt .. part.label;
+			local segment = wrap_title(part);
+			alt = build_aria_label_from(part.label);
+			segment = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
+					.. segment 
+					.. '</span>';
+			root = root .. segment;
 		end
 	end
-	if root ~= nil then
-		alt = build_aria_label_from(alt);
-		it = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
-				.. prefix .. root .. suffix 
-				.. '</span>';
-	end
+	it = root;
 	return it;
 end
 
@@ -441,19 +441,29 @@ end
 
 p.Zyun1ming4 = function( frame )
 	local parent = frame:getParent();
-	local s1 = sanitize(frame.args[1]);
 	local it;
 	local alt = '';
 	local styles = 'Module:書名/styles.css';
 	local error;
-	
+	local parts = {};
+	for k, v in pairs(parent.args) do
+		if type(k) == 'number' then
+			table.insert(parts, v);
+		elseif not error then
+			error = 'Unknown parameter ' .. k;
+		else
+			error = error .. ', ' .. k;
+		end
+	end
+	if #parts == 0 then
+		parts = nil;
+	end
+
 	-- build it
-	if s1 ~= nil then
-		s1 = parse_title(s1);
-		local alt = build_aria_label_from(s1['label']);
-		it = build_noncitable_proper(s1);
+	if parts ~= nil then
+		it = build_noncitable_proper(parts);
 		if it ~= nil then
-			it = '<span class=zyun1ming4 aria-label="' .. alt .. '">'
+			it = '<span class=zyun1ming4>'
 				.. it
 				.. '</span>';
 		end
@@ -465,7 +475,7 @@ p.Zyun1ming4 = function( frame )
 
 	if it == nil and error ~= nil then
 		it = '<span class=error>' .. error .. '</span>'
-			.. '（s1=' .. cvs(s1)
+			.. '（parts=' .. cvs(parts)
 			.. '）'
 	end
 	
