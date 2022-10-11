@@ -309,15 +309,17 @@ local function build_type_2_citable( work, part )
 	part = parse_title(part);
 	if part ~= nil then
 		class = 'pin1ming4';
-		prefix = '〈';
-		suffix = '〉';
 		if work ~= nil then
+			prefix = '《';
+			suffix = '》';
 			root = linkify_title(work)
 				.. '・'								-- dot = U+30FB
 				.. linkify_title(part);
 
 			alt = work.label .. '・' .. part.label;
 		else
+			prefix = '〈';
+			suffix = '〉';
 			root = linkify_title(part);
 			alt = part.label;
 		end
