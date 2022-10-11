@@ -485,19 +485,20 @@ local function auto_build_citable( work, part )
 end
 
 -- Automatically select whether to build noncitable with Unicode or underlining
-local function auto_build_noncitable( parts )
+local function auto_build_noncitable( parts, use_dots_p )
 	local type = determine_which_type_to_use(parts);
 	local it;
 	if type == TYPE_1 then
-		it = build_noncitable_proper_alternate(parts);
+		it = build_noncitable_proper_alternate(parts, use_dots_p);
 	else
-		it = build_noncitable_proper_simple(parts);
+		it = build_noncitable_proper_simple(parts, use_dots_p);
 	end
 	return it;
 end
 
 --- Exported, invocable functions ---------------------------------------------
 
+-- Entry point for Template:書名 and Template:篇名
 p.Syu1meng2 = function( frame )
 	local parent = frame:getParent();
 	local chapter_mode_p = (frame.args.mode and frame.args.mode == 'chapter') == true;
@@ -509,19 +510,17 @@ p.Syu1meng2 = function( frame )
 
 	-- figure out what is actually being marked up as a citable
 	local parts = {};
-	local name = ({[false] = '書名模'; [true] = '篇名模';})[chapter_mode_p];
+	local name = parent:getTitle();
 	if chapter_mode_p then
 		table.insert(parts, '');
+		name = '篇名模';
 	end
 	for k, v in pairs(parent.args) do
-		local ps = ' (參數明細：' .. cvs(parent.args) .. ')'
+		local ps = ' (參數明細：' .. cvs(parent.args) .. ')';
 		v = sanitize(v);
 		if ref(k) == 'number' then
-			if v then
-				table.insert(parts, v);
-			else
-				table.insert(parts, '');
-			end
+			assert(v ~= nil);
+			table.insert(parts, v);
 		elseif k == 'type' or k == '式' then
 			if type then
 				error(name..'遇到 '..k..' 參數，但係已經指咗 ｢'..type..'｣ 式'..ps);
@@ -547,7 +546,7 @@ p.Syu1meng2 = function( frame )
 				end
 				parts[2] = v;
 			end
-		elseif k ~= 'mode' then
+		else
 			error(name..'遇到不明參數 ｢' .. k .. '｣'..ps);
 		end
 	end
@@ -556,8 +555,8 @@ p.Syu1meng2 = function( frame )
 	elseif #parts > 2 then
 		error('指定咗太多章名，暫時處理唔到（parts='..cvs(parts)..'）');
 	end
-	work = parse_title(nullify(sanitize(parts[1])));
-	part = parse_title(nullify(sanitize(parts[2])));
+	work = parse_title(nullify(parts[1]));
+	part = parse_title(nullify(parts[2]));
 
 	-- fixup default type
 	if type == nil then
@@ -583,8 +582,10 @@ p.Syu1meng2 = function( frame )
 	return it;
 end
 
+-- Entry point for Template:專名
 p.Zyun1ming4 = function( frame )
 	local parent = frame:getParent();
+	local use_dots_p = (frame.args.mode and frame.args.mode == 'dotted') == true;
 	local it;
 	local alt = '';
 	local styles = 'Module:書名/styles.css';
@@ -605,7 +606,7 @@ p.Zyun1ming4 = function( frame )
 
 	-- build it
 	if parts ~= nil then
-		it = auto_build_noncitable(parts);
+		it = auto_build_noncitable(parts, use_dots_p);
 	else
 		if error == nil then
 			error = '專名模出錯，搵唔到有乜嘢名';
@@ -626,6 +627,7 @@ p.Zyun1ming4 = function( frame )
 	return it;
 end
 
+-- Entry point for Template:着重
 p.Zoek6zung6 = function( frame )
 	local parent = frame:getParent();
 	local s1 = sanitize(frame.args[1]);
