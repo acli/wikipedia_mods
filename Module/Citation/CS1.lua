@@ -3491,7 +3491,9 @@ local function citation0( config, args )
 		Edition = " " .. wrap_msg ('edition', Edition);
 		-- LOCAL: handle year-based edition numbering
 		if mw.ustring.match(Edition, '^[^第]*第%d+年[春夏秋冬]?版[^第]*$')
-		or mw.ustring.match(Edition, '^[^第]*第%d+年%d+月[^第]*$') then
+		or mw.ustring.match(Edition, '^[^第]*第%d+年%d+月[^第]*$')
+		or mw.ustring.match(Edition, '^[^第]*第初版[^第]*$')
+		or mw.ustring.match(Edition, '^[^第]*第修訂版[^第]*$') then
 			Edition = mw.ustring.gsub(Edition, '第', '')
 		end
 		-- END LOCAL
