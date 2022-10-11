@@ -38,11 +38,10 @@
 .syu1ming4 + .syu1ming4,
 .zyun1ming4-b + .zyun1ming4-b,
 .zyun1ming4 + .zyun1ming4 {
-	margin-left: 1px;
+	margin-left: 0.0833em;
 }
-.pin1ming4 .hai2tau4ge3.zit3 .zi6:after,
-.syu1ming4 .hai2tau4ge3.zit3 .zi6:after,
-.zyun1ming4 .hai2tau4ge3.zit3 .zi6:after {
+.pin1ming4 .hai2tau4ge3.zit3 .hai2tau4ge3.zi6:after,
+.syu1ming4 .hai2tau4ge3.zit3 .hai2tau4ge3.zi6:after {
 	clip-path: inset(0 0 0 0.05em);
 }
 .pin1ming4 .hai2zeoi3tau4ge3.hai2zeoi3mei1ge3.zit3 .hai2zeoi3tau4ge3.hai2zeoi3mei1ge3.zi6:after,
@@ -53,12 +52,21 @@
 .syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
 	clip-path: inset(0 0.14em 0 0);
 }
-.zyun1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
-	/* this is different because are dealing with a rotated glyph. Changing
-	   the margins and clipping will not work at all
-	 */
-	transform: rotate(90deg)translate(-0.25em,0.5em);
+/* These are different because are dealing with a rotated glyph. The coordinates
+   are backwards so using the normal rules will not work at all
+ */
+.zyun1ming4 .hai2tau4ge3.zit3 .hai2tau4ge3.zi6:after {
+	/*clip-path: inset(0.14em 0 0.35em 0);*/
 	overflow: hidden;
+}
+.zyun1ming4 .hai2tau4ge3.hai2zeoi3mei1ge3.zit3 {
+	clip-path: inset(0 0 0 0);
+}
+.zyun1ming4 .hai2tau4ge3.hai2zeoi3mei1ge3.zit3 .hai2tau4ge3.hai2zeoi3mei1ge3.zi6:after {
+	clip-path: inset(0.14em 0 0 0);
+}
+.zyun1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
+	transform: rotate(90deg)translate(-0.25em,0.5em);
 }
 .fan1gaak3 + .zi6:after {
 	clip-path: inset(0 0 0 0.1em);
@@ -104,4 +112,8 @@
 	text-underline-offset: 0.2em; /* XXX this works, but mw will nuke it */
 	white-space: nowrap; 
 	border-bottom: 0.05em solid currentColor;
+}
+.zyun1ming4-b + link + .zyun1ming4-b,	/* don't know why mw does this */
+.zyun1ming4-b + .zyun1ming4-b {
+	margin-left: 0.083em;
 }
