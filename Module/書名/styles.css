@@ -5,10 +5,10 @@
 .syu1ming4 {
   font-style: normal;
 }
-.pin1ming4 .zit3,
-.syu1ming4 .zit3,
-.zyun1ming4 .zit3,
-.zoek6zung6 .zit3 {
+.pin1ming4 > .zit3,
+.syu1ming4 > .zit3,
+.zyun1ming4 > .zit3,
+.zoek6zung6 > .zit3 {
   display: inline-block;
 }
 .pin1ming4 .zit3 > .zit3,
@@ -35,7 +35,9 @@
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
-.syu1ming4 + .syu1ming4,
+.syu1ming4 + .syu1ming4 {
+	margin-left: 0; /* XXX temporarily using 0 while kerning issues are being investigated */
+}
 .zyun1ming4-b + .zyun1ming4-b,
 .zyun1ming4 + .zyun1ming4 {
 	margin-left: 0.0833em;
