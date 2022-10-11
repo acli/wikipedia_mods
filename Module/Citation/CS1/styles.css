@@ -126,13 +126,15 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .syu1ming4 {
   font-style: normal;
 }
-.pin1ming4 .zit3,
-.syu1ming4 .zit3,
-.zoek6zung6 .zit3 {
+.pin1ming4 > .zit3,
+.syu1ming4 > .zit3,
+.zyun1ming4 > .zit3,
+.zoek6zung6 > .zit3 {
   display: inline-block;
 }
 .pin1ming4 .zit3 > .zit3,
 .syu1ming4 .zit3 > .zit3,
+.zyun1ming4 .zit3 > .zit3,
 .zoek6zung6 .zit3 > .zit3 {
   display: flex;
 }
@@ -148,21 +150,53 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 	font-size: 0.1px;
 	color: transparent;
 }
+.zyun1ming4 .fan1gaak3 {
+	font-size: 0.125px;
+}
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
 .syu1ming4 + .syu1ming4 {
-	margin-left: 0.125em;
+	margin-left: 0; /* XXX temporarily using 0 while kerning issues are being investigated */
 }
-.pin1ming4 > .zi6:last-child:after,
-.syu1ming4 > .zi6:last-child:after {
-	clip-path: inset(0 0.1em 0 0);
+.zyun1ming4-b + .zyun1ming4-b,
+.zyun1ming4 + .zyun1ming4 {
+	margin-left: 0.0833em;
+}
+.pin1ming4 .hai2tau4ge3.zit3 .hai2tau4ge3.zi6:after,
+.syu1ming4 .hai2tau4ge3.zit3 .hai2tau4ge3.zi6:after {
+	clip-path: inset(0 0 0 0.05em);
+}
+.pin1ming4 .hai2zeoi3tau4ge3.hai2zeoi3mei1ge3.zit3 .hai2zeoi3tau4ge3.hai2zeoi3mei1ge3.zi6:after,
+.syu1ming4 .hai2zeoi3tau4ge3.hai2zeoi3mei1ge3.zit3 .hai2zeoi3tau4ge3.hai2zeoi3mei1ge3.zi6:after {
+	clip-path: inset(0 0.14em 0 0.05em);
+}
+.pin1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
+.syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
+	clip-path: inset(0 0.14em 0 0);
+}
+/* These are different because are dealing with a rotated glyph. The coordinates
+   are backwards so using the normal rules will not work at all
+ */
+.zyun1ming4 .hai2tau4ge3.zit3 .hai2tau4ge3.zi6:after {
+	/*clip-path: inset(0.14em 0 0.35em 0);*/
+	overflow: hidden;
+}
+.zyun1ming4 .hai2tau4ge3.hai2zeoi3mei1ge3.zit3 {
+	clip-path: inset(0 0 0 0);
+}
+.zyun1ming4 .hai2tau4ge3.hai2zeoi3mei1ge3.zit3 .hai2tau4ge3.hai2zeoi3mei1ge3.zi6:after {
+	clip-path: inset(0.14em 0 0 0);
+}
+.zyun1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
+	transform: rotate(90deg)translate(-0.25em,0.5em);
 }
 .fan1gaak3 + .zi6:after {
 	clip-path: inset(0 0 0 0.1em);
 }
 .pin1ming4 .zi6:after,
 .syu1ming4 .zi6:after,
+.zyun1ming4 .zi6:after,
 .zoek6zung6 .zi6:after {
   position: absolute;
   align-self: baseline;
@@ -172,6 +206,13 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .syu1ming4 .zi6:after {
   padding-top: 1em;
   content: "﹋";
+}
+.zyun1ming4 .zi6:after {
+	/*padding-top: 1em;
+	content: "￣";*/
+	content: "︳";
+	transform-origin: bottom left;
+	transform: rotate(90deg) translate(-0.25em,0.35em);
 }
 .zoek6zung6 .zi6:after {
   padding-top: 0.6em;
@@ -188,6 +229,16 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .pin1ming4-b .saan1-adj,
 .syu1ming4-b .saan1-adj {
 	margin-right: -0.4em;
+}
+.zyun1ming4-b {
+	/* text-decoration: underline;
+	text-underline-offset: 0.2em; /* XXX this works, but mw will nuke it */
+	white-space: nowrap; 
+	border-bottom: 0.05em solid currentColor;
+}
+.zyun1ming4-b + link + .zyun1ming4-b,	/* don't know why mw does this */
+.zyun1ming4-b + .zyun1ming4-b {
+	margin-left: 0.083em;
 }
 /* END LOCAL */
 
