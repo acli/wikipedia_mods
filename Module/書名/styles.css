@@ -41,13 +41,19 @@
 	margin-left: 1px;
 }
 .pin1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
-.syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
-.zyun1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
+.syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
 	/* truncate the last zi6 in the last zit6 to make sure consecutive marks
 	   don't get joined; this is necessary because hangul might be a little
 	   narrower than kanji. clip-path: inset also works but mw will nuke it
 	 */
 	width: 0.86em;
+	overflow: hidden;
+}
+.zyun1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
+	/* this is different because are dealing with a rotated glyph. Changing
+	   the margins and clipping will not work at all
+	 */
+	transform: rotate(90deg)translate(-0.25em,0.5em);
 	overflow: hidden;
 }
 .fan1gaak3 + .zi6:after {
