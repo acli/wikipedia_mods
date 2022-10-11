@@ -528,14 +528,18 @@ p.Syu1meng2 = function( frame )
 			else
 				type = canonicalize_type_value(v);
 			end
-		elseif k == 'title' then
-			if sanitize(parts[1]) then
+		elseif (not chapter_mode_p and k == 'title')
+			or (chapter_mode_p and k == 'work') then
+				
+			if nullify(parts[1]) then
 				error(name..'遇到 '..k..' 參數，但係已經有 ｢'..parts[1]..'｣'..ps);
 			else
 				parts[1] = v;
 			end
-		elseif k == 'chapter' then
-			if sanitize(parts[2]) then
+		elseif k == 'chapter'
+			or (chapter_mode_p and k == 'title') then
+				
+			if nullify(parts[2]) then
 				error(name..'遇到 '..k..' 參數，但係已經有 ｢'..parts[2]..'｣'..ps);
 			else
 				if not parts[1] then
