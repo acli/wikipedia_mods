@@ -500,7 +500,7 @@ end
 
 p.Syu1meng2 = function( frame )
 	local parent = frame:getParent();
-	local chapter_mode_p = (parent.mode and parent.mode == 'chapter') == true;
+	local chapter_mode_p = (frame.args.mode and frame.args.mode == 'chapter') == true;
 	local it;
 	local alt = '';
 	local styles = 'Module:書名/styles.css';
