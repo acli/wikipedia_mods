@@ -272,7 +272,7 @@ local function build_type_1_citable( work, part )
 	end
 	if part2 ~= nil then
 		it = it .. '<span class=' .. class2 .. '>'
-				..' <span class=fan1gaak3>' .. infix .. '</span>'
+				.. '<span class=fan1gaak3>' .. infix .. '</span>'
 				.. linkify_title(part2)
 				.. '</span>';
 
