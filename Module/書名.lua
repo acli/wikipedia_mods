@@ -548,7 +548,7 @@ p.Syu1meng2 = function( frame )
 		end
 	end
 	if #parts == 0 then
-		error('冇指定書名或者篇名'..ps);
+		error('冇指定書名或者篇名');
 	elseif #parts > 2 then
 		error('指定咗太多章名，暫時處理唔到（parts='..cvs(parts)..'）');
 	end
