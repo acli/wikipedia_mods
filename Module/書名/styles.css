@@ -42,10 +42,15 @@
 .zyun1ming4 + .zyun1ming4 {
 	margin-left: 0.1em;
 }
-.pin1ming4 > .zi6:last-child:after,
-.syu1ming4 > .zi6:last-child:after,
-.zyun1ming4 > .zi6:last-child:after {
-	clip-path: inset(0 0.1em 0 0);
+.pin1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
+.syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
+.zyun1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
+	/* truncate the last zi6 in the last zit6 to make sure consecutive marks
+	   don't get joined; this is necessary because hangul might be a little
+	   narrower than kanji. clip-path: inset also works but mw will nuke it
+	 */
+	width: 0.86em;
+	overflow: hidden;
 }
 .fan1gaak3 + .zi6:after {
 	clip-path: inset(0 0 0 0.1em);
