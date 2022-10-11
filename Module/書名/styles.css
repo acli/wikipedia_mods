@@ -35,9 +35,7 @@
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
-.syu1ming4 + .syu1ming4 {
-	margin-left: 0; /* XXX temporarily using 0 while kerning issues are being investigated */
-}
+.syu1ming4 + .syu1ming4,
 .zyun1ming4-b + .zyun1ming4-b,
 .zyun1ming4 + .zyun1ming4 {
 	margin-left: 0.0833em;
