@@ -10,6 +10,9 @@
 require ('Module:No globals');
 local p = {};
 
+local TYPE_1 = '甲';
+local TYPE_2 = '乙';
+
 --- Debugging functions -------------------------------------------------------
 
 -- Figure out if a thing is an array
@@ -45,6 +48,8 @@ local function cvs( s )
 		s= tostring(s);
 	elseif type(s) == 'string' then
 		s = '(' .. mw.ustring.gsub(s, '([()])', '\\%1') .. ')';
+	elseif type(s) == 'function' then
+		s = 'FUNCTION';			-- sigh
 	elseif type(s) == 'table' then
 		local s2 = '';
 		if array_p(s) then
@@ -84,12 +89,20 @@ local function sanitize( arg )
 	return arg;
 end
 
+-- If the passed string is a null string, turn it into an actual null
+local function nullify( s )
+	if s == '' then
+		s = nil
+	end
+	return s;
+end
+
 -- Canonicalize the type parameter
 local function canonicalize_type_value( type )
-	if type == '甲' then
-		type = '1'
-	elseif type == '乙' then
-		type = '2'
+	if type == '1' or type == '甲' then
+		type = '甲'
+	elseif type == '2' or type == '乙' then
+		type = '乙'
 	end
 	return type;
 end
@@ -452,9 +465,9 @@ local function determine_which_type_to_use( work, part )
 		det = '';
 	end
 	if cjk_p(det) then
-		it = '1';
+		it = TYPE_1;
 	else
-		it = '2';
+		it = TYPE_2;
 	end
 	return it;
 end
@@ -463,7 +476,7 @@ end
 local function auto_build_citable( work, part )
 	local type = determine_which_type_to_use(work, part);
 	local it;
-	if type == '1' then
+	if type == TYPE_1 then
 		it = build_type_1_citable(work, part);
 	else
 		it = build_type_2_citable(work, part);
@@ -475,7 +488,7 @@ end
 local function auto_build_noncitable( parts )
 	local type = determine_which_type_to_use(parts);
 	local it;
-	if type == '1' then
+	if type == TYPE_1 then
 		it = build_noncitable_proper_alternate(parts);
 	else
 		it = build_noncitable_proper_simple(parts);
@@ -487,69 +500,77 @@ end
 
 p.Syu1meng2 = function( frame )
 	local parent = frame:getParent();
-	local s1 = sanitize(parent.args[1]);
-	local s2 = sanitize(parent.args[2]);
-	local title = sanitize(parent.args['title']);
-	local chapter = sanitize(parent.args['chapter']);
-	local type = sanitize(frame.args['type']);
+	local chapter_mode_p = (parent.mode and parent.mode == 'chapter') == true;
 	local it;
 	local alt = '';
 	local styles = 'Module:書名/styles.css';
 	local work, part;
-	local error;
-	
+	local type;
+
 	-- figure out what is actually being marked up as a citable
-	if s1 ~= nil and s2 ~= nil then
-		work = s1;
-		part = s2;
-	elseif s1 ~= nil and chapter ~= nil then
-		work = s1;
-		part = chapter;
-	elseif s1 == nil and chapter ~= nil then
-		part = chapter;
-	elseif s1 == nil and title ~= nil then
-		work = title;
-	elseif title ~= nil and chapter ~= nil then
-		work = title;
-		part = chapter;
-	elseif s1 ~= nil then
-		work = s1;
-	elseif s2 ~= nil then
-		part = s2;
+	local parts = {};
+	local name = ({[false] = '書名模'; [true] = '篇名模';})[chapter_mode_p];
+	if chapter_mode_p then
+		table.insert(parts, '');
 	end
-	work = parse_title(work);
-	part = parse_title(part);
-	
+	for k, v in pairs(parent.args) do
+		local ps = ' (參數明細：' .. cvs(parent.args) .. ')'
+		v = sanitize(v);
+		if ref(k) == 'number' then
+			if v then
+				table.insert(parts, v);
+			else
+				table.insert(parts, '');
+			end
+		elseif k == 'type' or k == '式' then
+			if type then
+				error(name..'遇到 '..k..' 參數，但係已經指咗 ｢'..type..'｣ 式'..ps);
+			else
+				type = canonicalize_type_value(v);
+			end
+		elseif k == 'title' then
+			if sanitize(parts[1]) then
+				error(name..'遇到 '..k..' 參數，但係已經有 ｢'..parts[1]..'｣'..ps);
+			else
+				parts[1] = v;
+			end
+		elseif k == 'chapter' then
+			if sanitize(parts[2]) then
+				error(name..'遇到 '..k..' 參數，但係已經有 ｢'..parts[2]..'｣'..ps);
+			else
+				if not parts[1] then
+					parts[1] = '';
+				end
+				parts[2] = v;
+			end
+		elseif k ~= 'mode' then
+			error(name..'遇到不明參數 ｢' .. k .. '｣'..ps);
+		end
+	end
+	if #parts == 0 then
+		error('冇指定書名或者篇名'..ps);
+	elseif #parts > 2 then
+		error('指定咗太多章名，暫時處理唔到（parts='..cvs(parts)..'）');
+	end
+	work = parse_title(nullify(sanitize(parts[1])));
+	part = parse_title(nullify(sanitize(parts[2])));
+
 	-- fixup default type
 	if type == nil then
 		type = 'auto';
 	end
-	type = canonicalize_type_value(type);
 
 	-- build it
-	if work == nil and part == nil then
-		if error == nil then
-			error = '書名模出錯，搵唔到書名，又搵唔到篇名';
-		end
-	elseif type == 'auto' then
+	if type == 'auto' then
 		it = auto_build_citable(work, part)
-	elseif type == '1' then							-- 甲式 (type 1)
+	elseif type == TYPE_1 then						-- 甲式 (type 1)
 		it = build_type_1_citable(work, part)
-	elseif type == '2' then							-- 乙式 (type 2)
+	elseif type == TYPE_2 then						-- 乙式 (type 2)
 		it = build_type_2_citable(work, part)
 	else
-		error = '唔明'..cvs(type)..'式書名號係乜';
+		error('唔明'..cvs(type)..'式書名號係乜');
 	end
 
-	if it == nil and error ~= nil then
-		it = '<span class=error>' .. error .. '</span>'
-			.. '（s1=' .. cvs(s1)
-			.. '，s2=' .. cvs(s2)
-			.. '，title=' .. cvs(title)
-			.. '，chapter=' .. cvs(chapter)
-			.. '）'
-	end
-	
 	-- request our style sheet
 	it = table.concat ({
 			frame:extensionTag ('templatestyles', '', {src=styles}),
@@ -569,9 +590,9 @@ p.Zyun1ming4 = function( frame )
 		if type(k) == 'number' then
 			table.insert(parts, v);
 		elseif not error then
-			error = 'Unknown parameter ' .. k;
+			error = '專名模遇到不明參數 ｢' .. k .. '｣';
 		else
-			error = error .. ', ' .. k;
+			error = error .. '、｢' .. k .. '｣';
 		end
 	end
 	if #parts == 0 then
