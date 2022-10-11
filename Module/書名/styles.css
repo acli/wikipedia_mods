@@ -35,12 +35,10 @@
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
-.syu1ming4 + .syu1ming4 {
-	margin-left: 0.125em;
-}
+.syu1ming4 + .syu1ming4,
 .zyun1ming4-b + .zyun1ming4-b,
 .zyun1ming4 + .zyun1ming4 {
-	margin-left: 0.1em;
+	margin-left: 1px;
 }
 .pin1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
 .syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after,
