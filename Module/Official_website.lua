@@ -89,7 +89,14 @@ local function renderUrl(options)
 	if not options.url and not options.wikidataurl then
 		local qid = mw.wikibase.getEntityIdForCurrentPage()
 		local result = '<strong class="error">' ..
+			--[[ LOCAL: localize error message -- disable original message
+			-- END LOCAL
 			'No URL found. Please specify a URL here or add one to Wikidata.' ..
+			-- LOCAL: replace with our own version
+			--]]
+			'喺維基數據搵唔到網站資料；'..
+			'你可以揀人手打，或者擺個官方網址入維基數據。'..
+			-- END LOCAL
 			'</strong>'
 		if qid then
 			result = result.. ' [[File:OOjs UI icon edit-ltr-progressive.svg |frameless |text-top |10px |alt=Edit this at Wikidata |link=https://www.wikidata.org/wiki/' .. qid .. '#P856|Edit this at Wikidata]]'
@@ -127,14 +134,23 @@ local function renderTrackingCategory(url, wikidataurl)
 	local category
 	if not url and not wikidataurl then
 		category = 'Official website missing URL'
+		-- LOCAL: translate maintenance category
+		category = '官方網站冇網址'
+		-- END LOCAL
 	elseif not url and wikidataurl then
 		return ''
 	elseif url and wikidataurl then
 		if url:gsub('/%s*$', '') ~= wikidataurl:gsub('/%s*$', '') then
 			category = 'Official website different in Wikidata and Wikipedia'
+			-- LOCAL: translate maintenance category
+			category = '官方網站喺維基數據同喺維基有唔同網址'
+			-- END LOCAL
 		end
 	else
 		category = 'Official website not in Wikidata'
+		-- LOCAL: translate maintenance category
+		category = '官方網站喺維基數據冇網址'
+		-- END LOCAL
 	end
 	return category and string.format('[[Category:%s]]', category) or ''
 end
@@ -142,10 +158,48 @@ end
 function p._main(args)
 	local url = args[1] or args.URL or args.url
 	local wikidataurl = fetchWikidataUrl()
+	-- LOCAL: restore the Cantonese introducer but make adjustments for non-CJK
+	local default_label = '官方網站';
+	local qid = mw.wikibase.getEntityIdForCurrentPage();
+	-- This gets a dict of all listed properties on Wikidata
+	-- /labels keys another dict indexed by language name (us is /yue).
+	-- The value is another dict with /language and /value keys.
+	-- value is the label in the stated language, which is yue if a
+	-- Cantonese label is entered into Wikidata, otw. it's listed as en.
+	-- The above technically should work but 竹內瑪莉亞 does not have
+	-- a /yue /label so it fails and we get the English name. To work
+	-- around this we can get the /sitelinks element instead, which
+	-- returns a dict containing dicts indexed by the site name (us is
+	-- zh_yuewiki), then get the /title element
+	local data = mw.wikibase.getEntity(qid);
+	if data and data.sitelinks and data.sitelinks.zh_yuewiki then
+		local candidate = data.sitelinks.zh_yuewiki.title;
+		-- Cut out any parenthesized qualifier in the label
+		candidate = mw.ustring.gsub(candidate, '%s*%([^%(%)]+%)$', '')
+		-- Check if the label ends in a CJK character
+		local det = mw.ustring.match(candidate, '(.)$');
+		local english_p = true;
+		local aux = require('模組:書名');
+		if aux then
+			english_p = not aux.cjk_p(det);
+		end
+		if english_p then
+			default_label = candidate .. ' 嘅' .. default_label;
+		else
+			default_label = candidate .. '嘅' .. default_label;
+		end
+	end
+	-- END LOCAL
 	local formattedUrl = renderUrl{
 		url = url,
 		wikidataurl = wikidataurl,
+		--[[ LOCAL: change default label - disable the original code
+		-- END LOCAL
 		display = args[2] or args.name or 'Official website',
+		-- LOCAL: change default label - replace with our version
+		--]]
+		display = args[2] or args.name or default_label,
+		-- END LOCAL
 		format = args.format,
 		mobile = args.mobile
 	}
