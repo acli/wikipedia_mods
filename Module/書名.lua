@@ -328,7 +328,15 @@ local function kern( s )
 	end
 	it = '';
 	while #t > 0 do
+		-- We might encounter a tag. try to not break it
 		local c, t_next = mw.ustring.match(t, '^(.)(.*)$');
+		if c == '<' then
+			local t1, t2 = mw.ustring.match(t, '^(<[^<>]*>)(.*)$');
+			if t1 then
+				c = t1;
+				t_next = t2;
+			end
+		end
 		if state == STATE.INITIAL then
 			if kernable_left_punctuation_p(c) then
 				state = STATE.OPENING;
