@@ -112,11 +112,11 @@ local function cjk_p( s )
 end
 
 local function kernable_left_punctuation_p( c )
-	return mw.ustring.match(c, '[《〈（「『]');
+	return mw.ustring.match(c, '[《〈（【「『]');
 end
 
 local function kernable_right_punctuation_p( c )
-	return mw.ustring.match(c, '[》〉）」』]');
+	return mw.ustring.match(c, '[》〉）】」』]');
 end
 
 -- Canonicalize the type parameter
@@ -328,7 +328,11 @@ local function kern( s )
 		if state == STATE.INITIAL then
 			if kernable_left_punctuation_p(c) then
 				state = STATE.OPENING;
-				segment = remember_kerned(c, 'koen1zo2siu2siu2', segment, state);
+				if #it == 0 then
+					segment = remember_kerned(c, 'koen1zo2', segment, state);
+				else
+					segment = remember_kerned(c, 'koen1zo2siu2siu2', segment, state);
+				end
 			elseif kernable_right_punctuation_p(c) then
 				state = STATE.CLOSING;
 				local s1, s2;
@@ -457,6 +461,8 @@ local function build_type_2_citable( work, part )
 		if work ~= nil then
 			prefix = '《';
 			suffix = '》';
+			work.label = prefix .. work.label;
+			part.label = part.label .. suffix;
 			root = linkify_title(kern(work))
 				.. '・'								-- dot = U+30FB
 				.. linkify_title(kern(part));
@@ -465,6 +471,7 @@ local function build_type_2_citable( work, part )
 		else
 			prefix = '〈';
 			suffix = '〉';
+			part.label = prefix .. part.label .. suffix;
 			root = linkify_title(kern(part));
 			alt = part.label;
 		end
@@ -472,15 +479,16 @@ local function build_type_2_citable( work, part )
 		class = 'syu1ming4';
 		prefix = '《';
 		suffix = '》';
+		work.label = prefix .. work.label .. suffix;
 		root = kern(work.label);
 		alt = work.label;
 	end
 	if root ~= nil then
-		alt = prefix .. build_aria_label_from(alt) .. suffix;
-		prefix = '<span class=hoi1-adj>' .. prefix .. '</span>';
-		suffix = '<span class=saan1-adj>'.. suffix .. '</span>';
+		alt = build_aria_label_from(alt);
+		--prefix = '<span class=hoi1-adj>' .. prefix .. '</span>';
+		--suffix = '<span class=saan1-adj>'.. suffix .. '</span>';
 		it = '<span class = "' .. class .. '-b" aria-label="' .. alt .. '">' 
-				.. prefix .. root .. suffix 
+				.. root 
 				.. '</span>';
 	end
 	return it;
