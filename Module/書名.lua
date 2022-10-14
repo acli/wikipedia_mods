@@ -13,7 +13,7 @@ local p = {};
 local TYPE_1 = '甲';
 local TYPE_2 = '乙';
 
---- Debugging functions -------------------------------------------------------
+--- Auxiliaries ---------------------------------------------------------------
 
 -- Figure out if a thing is an array
 local function array_p( thing )
@@ -79,8 +79,6 @@ local function cvs( s )
 	return s;
 end
 
---- Auxiliaries ---------------------------------------------------------------
-
 -- Return a sanitized version of an argument value
 local function sanitize( arg )
 	if arg ~= nil and arg:match('^{{{%w-}}}$') then
@@ -95,6 +93,30 @@ local function nullify( s )
 		s = nil
 	end
 	return s;
+end
+
+-- Check if the given string is (believed to be) CJK
+local function cjk_p( s )
+	return mw.ustring.match(s, '^['
+			.. '—'									-- 2014 (em dash)
+			.. '…'									-- 2026
+			.. '○'									-- 25CB (circle [not zero])
+			.. '⺀-䶿'								-- 2E80-4DBF
+			.. '一-鿿'								-- 4E00-9FFF
+			.. '가-힯'								-- AC00-D7AF
+			.. '豈-﫿'								-- F900-FAFF
+			.. '︰-﹏'								-- FE30-FE4F
+			.. '！-｠'								-- FF01-FF60
+			.. '𠀀-𯨟'								-- 20000-2FA1F
+			.. ']+$');
+end
+
+local function kernable_left_punctuation_p( c )
+	return mw.ustring.match(c, '[《〈（「『]');
+end
+
+local function kernable_right_punctuation_p( c )
+	return mw.ustring.match(c, '[》〉）」』]');
 end
 
 -- Canonicalize the type parameter
@@ -245,6 +267,116 @@ local function build_type_1_part( s )
 	return it;
 end
 
+-- Try to kern the given string
+-- The logic is a deterministic finite state machine. The DFA diagram is
+-- currently on a piece of paper and will be added here later.
+local function kern( s )
+	local it;
+	s = parse_title(s);
+	assert(ref(s) == 'parsed-title');
+	local t = s.label;
+	local segment;
+	local STATE = { ['INITIAL'] = 'INITIAL';
+					['OPENING'] = 'OPENING';
+					['CLOSING'] = 'CLOSING';
+	};
+	local state = STATE.INITIAL;
+	local function remember_kerned( c, class, segment, state )
+		if segment == nil then
+			segment = {};
+		end
+		table.insert(segment, { ['c'] = c;
+								['class'] = class;
+								['state'] = state; });
+		return segment;
+	end
+	local function remember_unkerned(c, segment, state)
+		if segment == nil then
+			segment = {};
+		end
+		if #segment == 0 or segment[#segment].class then
+			table.insert(segment, { ['c'] = '';
+									['state'] = state; } );
+		end
+		segment[#segment].c = segment[#segment].c .. c;
+		return segment;
+	end
+	local function change_class_of_last_remembered( segment, class, state )
+		if segment ~= nil and #segment > 0 then
+			segment[#segment].class = class;
+		end
+		return segment;
+	end
+	local function flush_segment( segment, it, state )
+		local s = '';
+		if segment then
+			for i, v in pairs(segment) do
+				if v.class then
+					s = s .. '<span class=' .. v.class .. '>' .. v.c .. '</span>'
+				else
+					s = s .. v.c;
+				end
+			end
+			it = it .. '<span class=zit3 ' .. ' data-state=' .. state .. '>' .. s .. '</span>';
+		end
+		segment = {};
+		return segment, it;
+	end
+	it = '';
+	while #t > 0 do
+		local c, t_next = mw.ustring.match(t, '^(.)(.*)$');
+		if state == STATE.INITIAL then
+			if kernable_left_punctuation_p(c) then
+				state = STATE.OPENING;
+				segment = remember_kerned(c, 'koen1zo2siu2siu2', segment, state);
+			elseif kernable_right_punctuation_p(c) then
+				state = STATE.CLOSING;
+				local s1, s2;
+				if segment and #segment > 0 and #(segment[#segment].c) > 0 then
+					s1, s2 = mw.ustring.match(segment[#segment].c, '^(.*)(.)$');
+					segment[#segment].c = s1;
+				else
+					s2 = '';
+				end
+				segment, it = flush_segment(segment, it, state);
+				segment = remember_unkerned(s2, segment, state);
+				segment = remember_kerned(c, 'koen1jau6', segment, state);
+			else
+				segment = remember_unkerned(c, segment, state);
+			end
+		elseif state == STATE.OPENING then
+			if kernable_left_punctuation_p(c) then
+				segment = remember_kerned(c, 'koen1zo2', segment, state);
+			elseif kernable_right_punctuation_p(c) then
+				state = STATE.CLOSING;
+				segment = remember_kerned(c, 'koen1jau6', segment, state);
+			else
+				state = STATE.INITIAL;
+				segment = remember_unkerned(c, segment, state);
+				segment, it = flush_segment(segment, it, state);
+			end
+		elseif state == STATE.CLOSING then
+			if kernable_left_punctuation_p(c) then
+				state = STATE.OPENING;
+				segment, it = flush_segment(segment, it, state);
+				segment = remember_unkerned(c, segment, state);
+			elseif kernable_right_punctuation_p(c) then
+				segment = remember_kerned(c, 'koen1jau6', segment, state);
+			else
+				state = STATE.INITIAL;
+				segment = change_class_of_last_remembered(segment, 'koen1jau6siu2siu2', state)
+				segment = remember_unkerned(c, segment, state);
+				segment, it = flush_segment(segment, it, state);
+			end
+		else
+			error('kern() encountered unexpeected state '.. cvs(state));
+		end
+		t = t_next;
+	end
+	segment, it = flush_segment(segment, it, state);
+	return it;
+end
+
 -- Build a type 1 citable with type 2 as a fallback
 local function build_type_1_citable( work, part )
 	local it;
@@ -325,22 +457,22 @@ local function build_type_2_citable( work, part )
 		if work ~= nil then
 			prefix = '《';
 			suffix = '》';
-			root = linkify_title(work)
+			root = linkify_title(kern(work))
 				.. '・'								-- dot = U+30FB
-				.. linkify_title(part);
+				.. linkify_title(kern(part));
 
 			alt = work.label .. '・' .. part.label;
 		else
 			prefix = '〈';
 			suffix = '〉';
-			root = linkify_title(part);
+			root = linkify_title(kern(part));
 			alt = part.label;
 		end
 	elseif work ~= nil then
 		class = 'syu1ming4';
 		prefix = '《';
 		suffix = '》';
-		root = work.label;
+		root = kern(work.label);
 		alt = work.label;
 	end
 	if root ~= nil then
@@ -424,22 +556,6 @@ local function build_noncitable_proper_alternate( parts, use_dot_p )
 		.. root
 		.. '</span>';
 	return it;
-end
-
--- Check if the given string is (believed to be) CJK
-local function cjk_p( s )
-	return mw.ustring.match(s, '^['
-			.. '—'									-- 2014 (em dash)
-			.. '…'									-- 2026
-			.. '○'									-- 25CB (circle [not zero])
-			.. '⺀-䶿'								-- 2E80-4DBF
-			.. '一-鿿'								-- 4E00-9FFF
-			.. '가-힯'								-- AC00-D7AF
-			.. '豈-﫿'								-- F900-FAFF
-			.. '︰-﹏'								-- FE30-FE4F
-			.. '！-｠'								-- FF01-FF60
-			.. '𠀀-𯨟'								-- 20000-2FA1F
-			.. ']+$');
 end
 
 -- Analyze the given title(s) and decide if type 1 is safe to use
@@ -630,34 +746,79 @@ end
 -- Entry point for Template:着重
 p.Zoek6zung6 = function( frame )
 	local parent = frame:getParent();
-	local s1 = sanitize(frame.args[1]);
 	local it;
 	local alt = '';
 	local styles = 'Module:書名/styles.css';
-	local error;
+
+	local parts = {};
+	for k, v in pairs(parent.args) do
+		if type(k) == 'number' then
+			v = parse_title(v);
+			v.alt = build_aria_label_from(v.label);
+			table.insert(parts, v);
+		else
+			error('着重模遇到不明參數 ｢' .. k .. '｣');
+		end
+	end
+	if #parts == 0 then
+		error('着重模出錯，搵唔到着重乜嘢');
+	end
 	
 	-- build it
-	if s1 ~= nil then
-		s1 = parse_title(s1);
-		local alt = build_aria_label_from(s1.label);
-		it = build_type_1_part(s1);
+	it = '';
+	for i, v in pairs(parts) do
+		v = parse_title(v);
+		local segment = build_type_1_part(v.label);
 		if it ~= nil then
-			it = '<span class=zoek6zung6 aria-label="' .. alt .. '">'
-				.. it
+			it = it
+				.. '<span class=zoek6zung6 aria-label="' .. v.alt .. '">'
+				.. segment
 				.. '</span>';
-		end
-	else
-		if error == nil then
-			error = '着重模出錯，搵唔到着重乜嘢';
 		end
 	end
 
-	if it == nil and error ~= nil then
-		it = '<span class=error>' .. error .. '</span>'
-			.. '（s1=' .. cvs(s1)
-			.. '）'
+	-- request our style sheet
+	it = table.concat ({
+			frame:extensionTag ('templatestyles', '', {src=styles}),
+			it
+		});
+	return it;
+end
+
+-- Entry point for Template:Kern
+p.Kern = function( frame )
+	local parent = frame:getParent();
+	local it;
+	local alt = '';
+	local styles = 'Module:書名/styles.css';
+
+	local parts = {};
+	for k, v in pairs(parent.args) do
+		if type(k) == 'number' then
+			v = parse_title(v);
+			v.alt = build_aria_label_from(v.label);
+			table.insert(parts, v);
+		else
+			error('Kern 模遇到不明參數 ｢' .. k .. '｣');
+		end
 	end
-	
+	if #parts == 0 then
+		error('Kern 模出錯，搵唔到 kern 乜嘢');
+	end
+
+	-- build it
+	it = '';
+	for i, v in pairs(parts) do
+		v = parse_title(v);
+		local segment = kern(v.label);
+		if it ~= nil then
+			it = it
+				.. '<span class=koen1 aria-label="' .. v.alt .. '">'
+				.. segment
+				.. '</span>';
+		end
+	end
+
 	-- request our style sheet
 	it = table.concat ({
 			frame:extensionTag ('templatestyles', '', {src=styles}),
@@ -671,6 +832,8 @@ end
 p.cvs = cvs;
 p.ref = ref;
 p.cjk_p = cjk_p;
+p.kernable_left_punctuation_p = kernable_left_punctuation_p;
+p.kernable_right_punctuation_p = kernable_right_punctuation_p;
 p.array_p = array_p;
 p.determine_which_type_to_use = determine_which_type_to_use;
 p.build_type_1_citable = build_type_1_citable;
