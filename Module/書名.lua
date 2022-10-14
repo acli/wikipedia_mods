@@ -111,6 +111,10 @@ local function cjk_p( s )
 			.. ']+$');
 end
 
+local function space_p( c )
+	return mw.ustring.match(c, '[ ]');
+end
+
 local function kernable_left_punctuation_p( c )
 	return mw.ustring.match(c, '[《〈（【「『]');
 end
@@ -317,7 +321,7 @@ local function kern( s )
 					s = s .. v.c;
 				end
 			end
-			it = it .. '<span class=zit3 ' .. ' data-state=' .. state .. '>' .. s .. '</span>';
+			it = it .. '<span class=zit3 ' .. '>' .. s .. '</span>';
 		end
 		segment = {};
 		return segment, it;
@@ -368,7 +372,9 @@ local function kern( s )
 				segment = remember_kerned(c, 'koen1jau6', segment, state);
 			else
 				state = STATE.INITIAL;
-				segment = change_class_of_last_remembered(segment, 'koen1jau6siu2siu2', state)
+				if not space_p(c) then
+					segment = change_class_of_last_remembered(segment, 'koen1jau6siu2siu2', state)
+				end
 				segment = remember_unkerned(c, segment, state);
 				segment, it = flush_segment(segment, it, state);
 			end
