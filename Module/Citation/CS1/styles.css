@@ -156,9 +156,7 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .pin1ming4 + .pin1ming4,
 .pin1ming4 + .syu1ming4,
 .syu1ming4 + .pin1ming4,
-.syu1ming4 + .syu1ming4 {
-	margin-left: 0; /* XXX temporarily using 0 while kerning issues are being investigated */
-}
+.syu1ming4 + .syu1ming4,
 .zyun1ming4-b + .zyun1ming4-b,
 .zyun1ming4 + .zyun1ming4 {
 	margin-left: 0.0833em;
@@ -222,10 +220,12 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 }
 
 /* Type B */
+.koen1zo2,
 .pin1ming4-b .hoi1-adj,
 .syu1ming4-b .hoi1-adj {
 	margin-left: -0.4em;
 }
+.koen1jau6,
 .pin1ming4-b .saan1-adj,
 .syu1ming4-b .saan1-adj {
 	margin-right: -0.4em;
