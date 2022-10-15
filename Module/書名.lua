@@ -289,9 +289,9 @@ end
 -- Try to kern the given string
 -- The logic is a deterministic finite state machine. The DFA diagram is
 -- currently on a piece of paper and will be added here later.
-local function kern( s )
+local function kern( s0 )
 	local it;
-	s = parse_title(s);
+	local s = parse_title(s0);
 	assert(ref(s) == 'parsed-title');
 	local t = s.label;
 	local segment;
@@ -407,6 +407,10 @@ local function kern( s )
 		t = t_next;
 	end
 	segment, it = flush_segment(segment, it, state);
+	if ref(s0) == 'parsed-title' then	-- try to return a result that's the same type
+		s.label = it;
+		it = s;
+	end
 	return it;
 end
 
@@ -509,7 +513,7 @@ local function build_type_2_citable( work, part )
 		prefix = '《';
 		suffix = '》';
 		work.label = prefix .. work.label .. suffix;
-		root = kern(work.label);
+		root = linkify_title(kern(work));
 		alt = work.label;
 	end
 	if root ~= nil then
