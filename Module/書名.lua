@@ -100,7 +100,7 @@ local function cjk_p( s )
 	return mw.ustring.match(s, '^['
 			.. '—'									-- 2014 (em dash)
 			.. '…'									-- 2026
-			.. '─'									-- 2500 (graph drawing)
+			.. '─'									-- 2500 (line drawing)
 			.. '○'									-- 25CB (circle [not zero])
 			.. '⺀-䶿'								-- 2E80-4DBF
 			.. '一-鿿'								-- 4E00-9FFF
@@ -113,7 +113,7 @@ local function cjk_p( s )
 end
 
 local function space_p( c )
-	return mw.ustring.match(c, '[ ]');
+	return mw.ustring.match(c, '[ 　]');	-- sp, CJK sp
 end
 
 local function kernable_left_punctuation_p( c )
