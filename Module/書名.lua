@@ -124,6 +124,14 @@ local function kernable_right_punctuation_p( c )
 	return c and mw.ustring.match(c, '[》〉）】」』]');
 end
 
+local function left_kernable_narrow_punctuation_p( c )
+	return c and mw.ustring.match(c, '[，；：。！]');
+end
+
+local function right_kernable_narrow_punctuation_p( c )
+	return c and mw.ustring.match(c, '[、，；：。！]');
+end
+
 -- Canonicalize the type parameter
 local function canonicalize_type_value( type )
 	if type == '1' or type == '甲' then
@@ -387,7 +395,7 @@ local function kern( s )
 				segment = remember_kerned(c, 'koen1jau6', segment, state);
 			else
 				state = STATE.INITIAL;
-				if not space_p(c) then
+				if not space_p(c) and not left_kernable_narrow_punctuation_p(c) then
 					segment = change_class_of_last_remembered(segment, 'koen1jau6siu2siu2', state)
 				end
 				segment = remember_unkerned(c, segment, state);
