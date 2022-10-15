@@ -117,11 +117,11 @@ local function space_p( c )
 end
 
 local function kernable_left_punctuation_p( c )
-	return mw.ustring.match(c, '[《〈（【「『]');
+	return c and mw.ustring.match(c, '[《〈（【「『]');
 end
 
 local function kernable_right_punctuation_p( c )
-	return mw.ustring.match(c, '[》〉）】」』]');
+	return c and mw.ustring.match(c, '[》〉）】」』]');
 end
 
 -- Canonicalize the type parameter
@@ -177,6 +177,10 @@ local function parse_title( s )
 				end
 			end
 		end
+		-- Silent change a few things to make it easier to typeset
+		label = mw.ustring.gsub(label, '[─]', '—');		-- U+2500 line drawing
+		label = mw.ustring.gsub(label, '[○]', '〇');	-- U+25CB circle
+		label = mw.ustring.gsub(label, '⸺', '——');	-- 2-em dash -0> 2x em dash'
 		it = {
 			['label'] = label;
 			['link'] = link;
@@ -236,14 +240,16 @@ local function build_type_1_part( s )
 	s = parse_title(s);
 	assert(ref(s) == 'parsed-title')
 	it = '';
-	for i = 1, mw.ustring.len(s.label), 1 do
+	local n1 = mw.ustring.len(s.label);
+	for i = 1, n1, 1 do
 		local c = mw.ustring.sub(s.label, i, i);
-		if opening_p or (#stage1 > 0 and mw.ustring.match('[》〉｣」』]', c)) then
+		local closing_p = mw.ustring.match('[】》〉）｣」』]', c);
+		if opening_p or closing_p then
 			table.insert(stage1[#stage1], c);
 		else
 			table.insert(stage1, {c});
 		end
-		opening_p = mw.ustring.match('[《〈｢「『]', c);
+		opening_p = mw.ustring.match('[【《〈（｢「『]', c);
 	end
 	for i = 1, #stage1, 1 do
 		local stage2 = stage1[i];
