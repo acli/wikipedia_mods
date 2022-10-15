@@ -100,6 +100,7 @@ local function cjk_p( s )
 	return mw.ustring.match(s, '^['
 			.. '—'									-- 2014 (em dash)
 			.. '…'									-- 2026
+			.. '─'									-- 2500 (graph drawing)
 			.. '○'									-- 25CB (circle [not zero])
 			.. '⺀-䶿'								-- 2E80-4DBF
 			.. '一-鿿'								-- 4E00-9FFF
