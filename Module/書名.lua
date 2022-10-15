@@ -300,6 +300,9 @@ local function kern( s0 )
 					['CLOSING'] = 'CLOSING';
 	};
 	local state = STATE.INITIAL;
+	local function tag_p( s )
+		return s:sub(1, 1) == '<';
+	end
 	local function remember_kerned( c, class, segment, state )
 		if segment == nil then
 			segment = {};
@@ -313,7 +316,8 @@ local function kern( s0 )
 		if segment == nil then
 			segment = {};
 		end
-		if #segment == 0 or segment[#segment].class then
+		if #segment == 0 or segment[#segment].class 
+		or tag_p(c) or tag_p(segment[#segment].c) then
 			table.insert(segment, { ['c'] = '';
 									['state'] = state; } );
 		end
@@ -344,6 +348,7 @@ local function kern( s0 )
 	it = '';
 	while #t > 0 do
 		-- We might encounter a tag. try to not break it
+		-- XXX Actually, if we see a tag maybe we should stop and give up
 		local c, t_next = mw.ustring.match(t, '^(.)(.*)$');
 		if c == '<' then
 			local t1, t2 = mw.ustring.match(t, '^(<[^<>]*>)(.*)$');
@@ -363,7 +368,9 @@ local function kern( s0 )
 			elseif kernable_right_punctuation_p(c) then
 				state = STATE.CLOSING;
 				local s1, s2;
-				if segment and #segment > 0 and #(segment[#segment].c) > 0 then
+				if segment and #segment > 0 
+				and #(segment[#segment].c) > 0
+				and not tag_p(segment[#segment].c) then
 					s1, s2 = mw.ustring.match(segment[#segment].c, '^(.*)(.)$');
 					segment[#segment].c = s1;
 				else
