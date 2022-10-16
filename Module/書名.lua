@@ -232,10 +232,70 @@ local function build_aria_label_from( s )
 	end
 	return	mw.ustring.gsub(
 			mw.ustring.gsub(
+			mw.ustring.gsub(
+			mw.ustring.gsub(
+			mw.ustring.gsub(
 			mw.ustring.gsub(s,
 				'<[^<>]*>', ''),					-- try to nuke tags
+				"'''''", ''),						-- Wikitext bold italic
+				"'''", ''),							-- Wikitext bold
+				"'", ''),							-- Wikitext italic
 				'"', '”'), 
 				"'", '’')
+end
+
+local function get_token( t )
+	local t_next;
+	local it = {['pre'] = ''; ['c'] = ''; ['post'] = '';};
+	for stage = 1, 3, 1 do
+		local t1, t2;
+		local formatting = '';
+		if stage == 1 then
+			t1, t2 = mw.ustring.match(t, '^(<[^/][^<>]*>)(.*)$');
+		elseif stage == 2 then
+			t1 = nil;
+		elseif stage == 3 then
+			t1, t2 = mw.ustring.match(t, '^(</[^<>]*>)(.*)$');
+		end
+		if t1 then
+			formatting = t1;
+			t_next = t2;
+		elseif stage == 1 or stage == 3 then
+			t1, t2 =  mw.ustring.match(t, "^(''''')(.*)$");
+			if not t1 then
+				t1, t2 =  mw.ustring.match(t, "^(''')(.*)$")
+				if not t1 then
+					t1, t2 =  mw.ustring.match(t, "^('')(.*)$");
+				end
+			end
+			if t1 then
+				formatting = t1;
+				t_next = t2;
+			else
+				formatting = nil;
+				t_next = t;
+			end
+		elseif stage == 2 then
+			t1, t2 = mw.ustring.match(t, '^([^<])(.*)$');
+			if t1 then
+				it.c = it.c .. t1;
+				t_next = t2;
+			else
+				t_next = t;
+			end
+		else
+			error('Internal error 2, stage='..cvs(stage), 1)
+		end
+		if formatting then
+			if stage == 1 then
+				it.pre = it.pre .. formatting;
+			else
+				it.post = it.post .. formatting;
+			end
+		end
+		t = t_next;
+	end
+	return it, t_next or '';
 end
 
 -- Build a type 1 part (not necessarily the entire title)
@@ -248,16 +308,17 @@ local function build_type_1_part( s )
 	s = parse_title(s);
 	assert(ref(s) == 'parsed-title')
 	it = '';
-	local n1 = mw.ustring.len(s.label);
-	for i = 1, n1, 1 do
-		local c = mw.ustring.sub(s.label, i, i);
-		local closing_p = mw.ustring.match('[】》〉）｣」』]', c);
+	local t = s.label;
+	while #t > 0 do
+		local c, t_next = get_token(t);
+		local closing_p = mw.ustring.match('[】》〉）｣」』]', c.c);
 		if opening_p or closing_p then
 			table.insert(stage1[#stage1], c);
 		else
 			table.insert(stage1, {c});
 		end
-		opening_p = mw.ustring.match('[【《〈（｢「『]', c);
+		opening_p = mw.ustring.match('[【《〈（｢「『]', c.c);
+		t = t_next;
 	end
 	for i = 1, #stage1, 1 do
 		local stage2 = stage1[i];
@@ -277,7 +338,9 @@ local function build_type_1_part( s )
 			if j == 1 then
 				class = 'hai2tau4ge3 '..class;
 			end
-			it = it .. '<span class="'..class..'">' .. stage2[j] .. '</span>';
+			local s = stage2[j];
+			local c = table.concat({s.pre or '', s.c, s.post or ''});
+			it = it .. '<span class="'..class..'">' .. c .. '</span>';
 		end
 		it = it .. '</span>' .. '</span>';
 	end
@@ -301,7 +364,7 @@ local function kern( s0 )
 	};
 	local state = STATE.INITIAL;
 	local function tag_p( s )
-		return s:sub(1, 1) == '<';
+		return s and s:sub(1, 1) == '<';
 	end
 	local function remember_kerned( c, class, segment, state )
 		if segment == nil then
@@ -316,12 +379,16 @@ local function kern( s0 )
 		if segment == nil then
 			segment = {};
 		end
-		if #segment == 0 or segment[#segment].class 
-		or tag_p(c) or tag_p(segment[#segment].c) then
-			table.insert(segment, { ['c'] = '';
+		if #segment == 0 
+		or segment[#segment].class 
+		or segment[#segment].post
+		or c.pre then
+			table.insert(segment, { ['c'] = c;
 									['state'] = state; } );
+		else
+			segment[#segment].c.c = table.concat({segment[#segment].c.c, c.c});
+			segment[#segment].c.post = c.post;
 		end
-		segment[#segment].c = segment[#segment].c .. c;
 		return segment;
 	end
 	local function change_class_of_last_remembered( segment, class, state )
@@ -330,17 +397,41 @@ local function kern( s0 )
 		end
 		return segment;
 	end
+	local function remove_last_character_from_memory( segment )
+		local it = {};
+		if segment and #segment > 0 
+		and #(segment[#segment].c.c) > 0 then
+			local s1, s2 = mw.ustring.match(segment[#segment].c.c, '^(.*)(.)$');
+			it.c = s2;
+			it.post = segment[#segment].c.post;
+			segment[#segment].c.c = s1;
+			segment[#segment].c.post = nil;
+			if #s1 == 0 then
+				it.pre = segment[#segment].c.pre;
+				segment[#segment].c.pre = nil;
+			end
+		else
+			it.c = '';
+		end
+		return it, segment;
+	end
 	local function flush_segment( segment, it, state )
 		local s = '';
 		if segment then
 			for i, v in pairs(segment) do
+				s = s .. (v.c.pre or '');
 				if v.class then
-					s = s .. '<span class=' .. v.class .. '>' .. v.c .. '</span>'
+					s = s .. '<span class=' .. v.class .. '>' .. v.c.c .. '</span>'
 				else
-					s = s .. v.c;
+					s = s .. v.c.c;
 				end
+				s = s .. (v.c.post or '');
 			end
-			it = it .. '<span class=zit3 ' .. '>' .. s .. '</span>';
+			if #s > 0 then
+				s = '<span class=zit3 ' .. '>' .. s .. '</span>';
+				--s=mw.ustring.gsub(s,'<','&lt;');--DEBUG
+				it = it .. s;
+			end
 		end
 		segment = {};
 		return segment, it;
@@ -349,43 +440,29 @@ local function kern( s0 )
 	while #t > 0 do
 		-- We might encounter a tag. try to not break it
 		-- XXX Actually, if we see a tag maybe we should stop and give up
-		local c, t_next = mw.ustring.match(t, '^(.)(.*)$');
-		if c == '<' then
-			local t1, t2 = mw.ustring.match(t, '^(<[^<>]*>)(.*)$');
-			if t1 then
-				c = t1;
-				t_next = t2;
-			end
-		end
+		local c, t_next = get_token(t);
 		if state == STATE.INITIAL then
-			if kernable_left_punctuation_p(c) then
+			if kernable_left_punctuation_p(c.c) then
 				state = STATE.OPENING;
 				if #it == 0 then
 					segment = remember_kerned(c, 'koen1zo2', segment, state);
 				else
 					segment = remember_kerned(c, 'koen1zo2siu2siu2', segment, state);
 				end
-			elseif kernable_right_punctuation_p(c) then
+			elseif kernable_right_punctuation_p(c.c) then
 				state = STATE.CLOSING;
-				local s1, s2;
-				if segment and #segment > 0 
-				and #(segment[#segment].c) > 0
-				and not tag_p(segment[#segment].c) then
-					s1, s2 = mw.ustring.match(segment[#segment].c, '^(.*)(.)$');
-					segment[#segment].c = s1;
-				else
-					s2 = '';
-				end
+				local c_last;
+				c_last, segment = remove_last_character_from_memory(segment);
 				segment, it = flush_segment(segment, it, state);
-				segment = remember_unkerned(s2, segment, state);
+				segment = remember_unkerned(c_last, segment, state);
 				segment = remember_kerned(c, 'koen1jau6', segment, state);
 			else
 				segment = remember_unkerned(c, segment, state);
 			end
 		elseif state == STATE.OPENING then
-			if kernable_left_punctuation_p(c) then
+			if kernable_left_punctuation_p(c.c) then
 				segment = remember_kerned(c, 'koen1zo2', segment, state);
-			elseif kernable_right_punctuation_p(c) then
+			elseif kernable_right_punctuation_p(c.c) then
 				state = STATE.CLOSING;
 				segment = remember_kerned(c, 'koen1jau6', segment, state);
 			else
@@ -394,15 +471,15 @@ local function kern( s0 )
 				segment, it = flush_segment(segment, it, state);
 			end
 		elseif state == STATE.CLOSING then
-			if kernable_left_punctuation_p(c) then
+			if kernable_left_punctuation_p(c.c) then
 				state = STATE.OPENING;
 				segment, it = flush_segment(segment, it, state);
 				segment = remember_unkerned(c, segment, state);
-			elseif kernable_right_punctuation_p(c) then
+			elseif kernable_right_punctuation_p(c.c) then
 				segment = remember_kerned(c, 'koen1jau6', segment, state);
 			else
 				state = STATE.INITIAL;
-				if not space_p(c) and not left_kernable_narrow_punctuation_p(c) then
+				if not space_p(c.c) and not left_kernable_narrow_punctuation_p(c.c) then
 					segment = change_class_of_last_remembered(segment, 'koen1jau6siu2siu2', state)
 				end
 				segment = remember_unkerned(c, segment, state);
