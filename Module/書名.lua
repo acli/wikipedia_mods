@@ -400,6 +400,9 @@ local function kern( s0 )
 	local function remove_last_character_from_memory( segment )
 		local it = {};
 		if segment and #segment > 0 
+		and segment[#segment].c.post then	-- last segment has a tag. sigh.
+			it.c = '';
+		elseif segment and #segment > 0 
 		and #(segment[#segment].c.c) > 0 then
 			local s1, s2 = mw.ustring.match(segment[#segment].c.c, '^(.*)(.)$');
 			it.c = s2;
