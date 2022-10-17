@@ -248,43 +248,48 @@ local function get_token( t )
 	local t_next;
 	local it = {['pre'] = ''; ['c'] = ''; ['post'] = '';};
 	for stage = 1, 3, 1 do
-		local t1, t2;
 		local formatting = '';
-		if stage == 1 then
-			t1, t2 = mw.ustring.match(t, '^(<[^/][^<>]*>)(.*)$');
-		elseif stage == 2 then
-			t1 = nil;
-		elseif stage == 3 then
-			t1, t2 = mw.ustring.match(t, '^(</[^<>]*>)(.*)$');
-		end
-		if t1 then
-			formatting = t1;
-			t_next = t2;
-		elseif stage == 1 or stage == 3 then
-			t1, t2 =  mw.ustring.match(t, "^(''''')(.*)$");
-			if not t1 then
-				t1, t2 =  mw.ustring.match(t, "^(''')(.*)$")
+		while true do
+			local t1, t2;
+			local done_p = false;
+			if stage == 1 then
+				t1, t2 = mw.ustring.match(t, '^(<[^/][^<>]*>)(.*)$');
+			elseif stage == 2 then
+				t1 = nil;
+			elseif stage == 3 then
+				t1, t2 = mw.ustring.match(t, '^(</[^<>]*>)(.*)$');
+			else
+				error('Internal error 1, stage='..cvs(stage), 1)
+			end
+			if t1 then
+				formatting = formatting .. t1;
+				t_next = t2;
+			elseif stage == 1 or stage == 3 then
+				t1, t2 =  mw.ustring.match(t, "^(''''')(.*)$");
 				if not t1 then
-					t1, t2 =  mw.ustring.match(t, "^('')(.*)$");
+					t1, t2 =  mw.ustring.match(t, "^(''')(.*)$")
+					if not t1 then
+						t1, t2 =  mw.ustring.match(t, "^('')(.*)$");
+					end
 				end
-			end
-			if t1 then
-				formatting = t1;
-				t_next = t2;
+				if t1 then
+					formatting = formatting .. t1;
+					t_next = t2;
+				else
+					done_p = true;
+				end
+			elseif stage == 2 then
+				t1, t2 = mw.ustring.match(t, '^([^<])(.*)$');
+				if t1 then
+					it.c = it.c .. t1;
+					t_next = t2;
+				end
+				done_p = true;
 			else
-				formatting = nil;
-				t_next = t;
+				error('Internal error 2, stage='..cvs(stage), 1)
 			end
-		elseif stage == 2 then
-			t1, t2 = mw.ustring.match(t, '^([^<])(.*)$');
-			if t1 then
-				it.c = it.c .. t1;
-				t_next = t2;
-			else
-				t_next = t;
-			end
-		else
-			error('Internal error 2, stage='..cvs(stage), 1)
+		if done_p then break end
+			t = t_next;
 		end
 		if formatting then
 			if stage == 1 then
@@ -293,7 +298,6 @@ local function get_token( t )
 				it.post = it.post .. formatting;
 			end
 		end
-		t = t_next;
 	end
 	return it, t_next or '';
 end
