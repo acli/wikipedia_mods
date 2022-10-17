@@ -169,6 +169,15 @@ local function parse_title( s )
 	local t = ref(s);
 	if t == 'string' then
 		local label, link, url;
+		local bold, italic, tmp;
+		bold, tmp = mw.ustring.match(s, "^(''')(.*)%1$");
+		if bold then
+			s = tmp;
+		end
+		italic, tmp = mw.ustring.match(s, "^(')(.*)%1$");
+		if italic then
+			s = tmp;
+		end
 		link, label = mw.ustring.match(s, '^%[%[%s*([^%[][^%[]*)%s*|%s*([^%[%]]*)%s*%]%]$');
 		if link then
 			if label and #label == 0 then
@@ -193,6 +202,8 @@ local function parse_title( s )
 			['label'] = label;
 			['link'] = link;
 			['url'] = url;
+			['bold'] = bold;
+			['italic'] = italic;
 		};
 	elseif t and t ~= 'parsed-title' then
 		error('parse-title got unexpected argument '..cvs(s) .. ' (t=' .. cvs(t) .. ')', 2);
@@ -204,9 +215,12 @@ end
 -- This does not seem to actually work
 local function linkify_title( label, link, url )
 	local it;
+	local bold, italic;
 	if type(label) == 'table' then
 		link = label.link;
 		url = label.url;
+		bold = label.bold;
+		italic = label.italic;
 		label = label.label;
 	end
 	if label == nil then
@@ -217,6 +231,12 @@ local function linkify_title( label, link, url )
 		it = '[' .. url .. ' ' .. label .. ']';
 	else
 		it = label;
+	end
+	if bold then
+		it = "'''" .. it .. "'''";
+	end
+	if italic then
+		it = "''" .. it .. "''";
 	end
 	return it;
 end
@@ -349,7 +369,8 @@ local function build_type_1_part( s )
 		it = it .. '</span>' .. '</span>';
 	end
 	--it = 'DEBUG: stage1 = ' .. cvs(stage1) .. '<br>→ it = ' .. cvs(it); 
-	it = linkify_title(it, s.link, s.url);
+	s.label = it;
+	it = linkify_title(s);
 	return it;
 end
 
