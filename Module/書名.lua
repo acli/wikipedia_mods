@@ -174,7 +174,7 @@ local function parse_title( s )
 		if bold then
 			s = tmp;
 		end
-		italic, tmp = mw.ustring.match(s, "^(')(.*)%1$");
+		italic, tmp = mw.ustring.match(s, "^('')(.*)%1$");
 		if italic then
 			s = tmp;
 		end
