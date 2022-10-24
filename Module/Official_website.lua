@@ -207,9 +207,29 @@ function p._main(args)
 end
 
 function p.main(frame)
+	--[[ LOCAL: disable Module:Arguments
+	-- END LOCAL
 	local args = require('Module:Arguments').getArgs(frame, {
 		wrappers = 'Template:Official website'
 	})
+	--]]-- LOCAL: replace with our own code to figure out arguments
+	local parent = frame:getParent();
+	local name = parent:getTitle();
+	local args = {};
+	for k, v in pairs(parent.args) do
+		if k == 1 or k == 'url' or k == 'URL' then
+			args.url = v;
+		elseif k == 2 or k == 'name' then
+			args.name = v;
+		elseif k == 'mobile' then
+			args.mobile = v;
+		elseif k == 'format' then
+			args.format = v;
+		else
+			error(name .. '遇到不明參數 ｢' .. k .. '｣');
+		end
+	end
+	-- END LOCAL
 	return p._main(args)
 end
 
