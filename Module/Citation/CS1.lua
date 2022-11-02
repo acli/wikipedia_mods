@@ -3496,6 +3496,11 @@ local function citation0( config, args )
 		or mw.ustring.match(Edition, '^[^第]*第再版[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第修訂版[^第]*$') then
 			Edition = mw.ustring.gsub(Edition, '第', '')
+		-- stupid hacks
+		elseif mw.ustring.match(Edition, '^[^第]*第print版[^第]*') then
+			Edition = mw.ustring.gsub(Edition, '第print', '印刷');
+		elseif mw.ustring.match(Edition, '^[^第]*第revised版[^第]*') then
+			Edition = mw.ustring.gsub(Edition, '第print', '修訂');
 		end
 		-- END LOCAL
 	else

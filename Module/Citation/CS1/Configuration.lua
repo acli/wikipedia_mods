@@ -1056,7 +1056,7 @@ local prop_cats = {
 	['local-lang-source'] = 'CS1用$1語言文字 ($2)',						-- |language= categories; $1 is local-language name, $2 is ISO639-1 code; not emitted when local_lang_cat_enable is false
 	['location-test'] = 'CS1 location test',
 	['long-vol'] = 'CS1: long volume value',									-- probably temporary cat to identify scope of |volume= values longer than 4 charachters
-	['script'] = 'CS1用用$1語言文字 ($2)',					-- |script-title=xx: has matching category; $1 is language name, $2 is ISO639-1 code
+	['script'] = 'CS1用$1語言文字 ($2)',					-- |script-title=xx: has matching category; $1 is language name, $2 is ISO639-1 code
 	['tracked-param'] = 'CS1 tracked parameter: $1',							-- $1 is base (enumerators removed) parameter name
 	['year-range-abbreviated'] = 'CS1: abbreviated year range',					-- probably temporary cat to identify scope of |date=, |year= values using YYYY–YY form
 	}
