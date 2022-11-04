@@ -3494,7 +3494,9 @@ local function citation0( config, args )
 		or mw.ustring.match(Edition, '^[^第]*第%d+年%d+月[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第初版[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第再版[^第]*$')
-		or mw.ustring.match(Edition, '^[^第]*第修訂版[^第]*$') then
+		or mw.ustring.match(Edition, '^[^第]*第修訂版[^第]*$')
+		or mw.ustring.match(Edition, '^[^第]*第神版[^第]*')
+		or mw.ustring.match(Edition, '^[^第]*第上帝版[^第]*') then
 			Edition = mw.ustring.gsub(Edition, '第', '')
 		-- stupid hacks
 		elseif mw.ustring.match(Edition, '^[^第]*第print版[^第]*') then
