@@ -1,0 +1,136 @@
+#!/usr/bin/perl
+# vi:set sw=3 ai sm:
+
+# see https://stackoverflow.com/questions/6162484/why-does-modern-perl-avoid-utf-8-by-default for these crazy hacks
+# THERE ARE MORE CRAZY HACKS THERE FOR MORE COMPLEX PROJECTS!!
+use v5.12; # minimal for unicode string feature
+use v5.14; # //u modifier
+use utf8;
+use open qw( :encoding(UTF-8) :std );
+use charnames qw( :full :short );
+use feature "unicode_strings";
+
+use warnings qw( FATAL utf8 );
+use Encode qw( encode decode );
+#@ARGV = map { decode("UTF-8", $_) } @ARGV if grep /\P{ASCII}/ => @ARGV; # This causes more problems than it solves
+
+binmode STDIN, ':utf8';
+binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
+
+select((select(STDERR), $| = 1)[0]); # I don't know why this is needed for STDERR
+
+use feature 'signatures';
+no warnings 'experimental::signatures';
+
+sub encode_char( $s ) {
+   state $strokes_list_opened_p = 0;
+   state $radicals_list_opened_p = 0;
+   state %strokes;
+   state %radical;
+   my $it;
+   my $n = $s;
+   $n =~ s{.}{ ord $& }e;
+   $n += 0;
+   if (!defined $strokes{$s}) {
+      for (my $tries = 0; $tries < 2;) {
+	 if (!$strokes_list_opened_p) {
+	    my $input = 'Unihan_IRGSources.txt';	# assuming version 14
+	    open(STROKES, '<', $input) or die "$input: $!\n";
+	    #print "REOPEN $input! (s=$s, tries=$tries)\n";
+	    $strokes_list_opened_p = 1;
+	 }
+	 my $t = scalar <STROKES>;
+	 if (!defined $t && $tries < 2) {
+	    $strokes_list_opened_p = 0;
+	    $tries += 1;
+	 } else {
+      last unless defined $t;
+	    chomp $t;
+	    if ($t =~ /^U\+(\S+)\tkTotalStrokes\t(\d+)/) {
+	       my($m, $strokes) = (hex($1), $2 + 0);
+	       if ($m == $n) {
+		  #print "GOT HERE m=n=$n -> strokes=$strokes\n";
+		  $strokes{$s} = $strokes;
+	       } elsif ($m > $n) {
+		  close STROKES;
+		  $strokes_list_opened_p = 0;
+		  $tries += 1;
+	       }
+	    }
+	 }
+      }
+   }
+   if (!defined $radical{$s}) {
+      for (my $tries = 0; $tries < 2;) {
+	 if (!$radicals_list_opened_p) {
+	    my $input = 'Unihan_RadicalStrokeCounts.txt';	# assuming version 14
+	    open(RADICALS, '<', $input) or die "$input: $!\n";
+	    #print "REOPEN $input! (s=$s, tries=$tries)\n";
+	    $radicals_list_opened_p = 1;
+	 }
+	 my $t = scalar <RADICALS>;
+	 if (!defined $t && $tries < 2) {
+	    $radicals_list_opened_p = 0;
+	    $tries += 1;
+	 } else {
+      last unless defined $t;
+	    chomp $t;
+	    if ($t =~ /^U\+(\S+)\tkRSKangXi\t(\d+)\.(\d+)/) {
+	       my($m, $radical, $strokes_minus_radical) = (hex($1), $2 + 0, $3 + 0);
+	       if ($m == $n) {
+		  #print "GOT HERE m=n=$n -> radical=$radical\n";
+		  $radical{$s} = $radical;
+	       } elsif ($m > $n) {
+		  close RADICALS;
+		  $radicals_list_opened_p = 0;
+		  $tries += 1;
+	       }
+	    }
+	 }
+      }
+   }
+   $it = sprintf('%02dr%03d', $strokes{$s}, $radical{$s});
+   return $it;
+}
+
+sub encode_word( $s ) {
+   return join('-', map { encode_char $_ } split(//, $s));
+}
+
+for (my $wikitable_p;;) {
+   my $s = scalar <>;
+last unless defined $s;
+   chomp $s;
+   if ($s =~ /^\s*\{\|/s) {
+      $wikitable_p += 1;
+   } elsif ($s =~ /^\s*\|\}/s) {
+      $wikitable_p -= 1;
+   } elsif ($wikitable_p && $s =~ /^\|(?![-\+])\s*(.*)\s*$/s) {
+      my $det = $1;
+      #print "BAR! ($det)\n";
+      (my $attrs, $det) = ($1, $2) if $det =~ /^(.*?)\|\s*(.*)$/;
+      my $data = $det;
+      $det =~ s/(?:／|\s*\/)\s*<br>.*//g;	# kill alternates
+      $det =~ s/（[^（）]*）//g;		# kill CJK parentheses
+      $det =~ s/<ref\b[^<>]*>.*?<\/ref>//g;	# kill ref tags
+      $det =~ s/<[^<>]*>//g;			# kill HTML tags
+      $det =~ s/\{\{(?:rp)\|.*?\}\}//g;		# kill rp
+      $det =~ s/\{\{(?:kern|ruby|書名|專名)\|([^\|]*?)(?:\s*\|\s*.*?)*\}\}/$1/g;
+      #print "BAZ! ($det)\n";
+      if ($det =~ /^[\p{Han}]+$/s) {
+	 my $code = encode_word($det);
+	 #print "FOO! ($det) -> ($code)\n";
+	 if (!defined $attrs) {
+	    $s = sprintf('|data-sort-value=%s| %s', $code, $data);
+	 } else {
+	    $attrs =~ s/data-sort-value="[^""]*"//;
+	    $attrs =~ s/data-sort-value='[^'']*'//;
+	    $attrs =~ s/data-sort-value=\S+//;
+	    $attrs =~ s/data-sort-value=//;
+	    $s = sprintf('|data-sort-value=%s %s| %s', $code, $attrs, $data);
+	 }
+      }
+   }
+   printf "%s\n", $s;
+}
