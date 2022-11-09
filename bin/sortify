@@ -23,6 +23,11 @@ select((select(STDERR), $| = 1)[0]); # I don't know why this is needed for STDER
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
+use Getopt::Long;
+
+use vars qw( $debug_p );
+use vars qw( $treat_punctuation_as_alternates_p );
+
 sub encode_char( $s ) {
    state $strokes_list_opened_p = 0;
    state $radicals_list_opened_p = 0;
@@ -37,7 +42,7 @@ sub encode_char( $s ) {
 	 if (!$strokes_list_opened_p) {
 	    my $input = 'Unihan_IRGSources.txt';	# assuming version 14
 	    open(STROKES, '<', $input) or die "$input: $!\n";
-	    #print "REOPEN $input! (s=$s, tries=$tries)\n";
+	    print STDERR "REOPEN $input! (s=$s, tries=$tries)\n" if $debug_p;
 	    $strokes_list_opened_p = 1;
 	 }
 	 my $t = scalar <STROKES>;
@@ -50,7 +55,7 @@ sub encode_char( $s ) {
 	    if ($t =~ /^U\+(\S+)\tkTotalStrokes\t(\d+)/) {
 	       my($m, $strokes) = (hex($1), $2 + 0);
 	       if ($m == $n) {
-		  #print "GOT HERE m=n=$n -> strokes=$strokes\n";
+		  print STDERR "GOT HERE m=n=$n -> strokes=$strokes\n" if $debug_p;
 		  $strokes{$s} = $strokes;
 	       } elsif ($m > $n) {
 		  close STROKES;
@@ -66,7 +71,7 @@ sub encode_char( $s ) {
 	 if (!$radicals_list_opened_p) {
 	    my $input = 'Unihan_RadicalStrokeCounts.txt';	# assuming version 14
 	    open(RADICALS, '<', $input) or die "$input: $!\n";
-	    #print "REOPEN $input! (s=$s, tries=$tries)\n";
+	    print STDERR "REOPEN $input! (s=$s, tries=$tries)\n" if $debug_p;
 	    $radicals_list_opened_p = 1;
 	 }
 	 my $t = scalar <RADICALS>;
@@ -79,7 +84,7 @@ sub encode_char( $s ) {
 	    if ($t =~ /^U\+(\S+)\tkRSKangXi\t(\d+)\.(\d+)/) {
 	       my($m, $radical, $strokes_minus_radical) = (hex($1), $2 + 0, $3 + 0);
 	       if ($m == $n) {
-		  #print "GOT HERE m=n=$n -> radical=$radical\n";
+		  print STDERR "GOT HERE m=n=$n -> radical=$radical\n" if $debug_p;
 		  $radical{$s} = $radical;
 	       } elsif ($m > $n) {
 		  close RADICALS;
@@ -98,8 +103,13 @@ sub encode_word( $s ) {
    return join('-', map { encode_char $_ } split(//, $s));
 }
 
+GetOptions(
+   '--debug' => \$debug_p,
+   '-s|kill-punctuation' => \$treat_punctuation_as_alternates_p,
+) || exit(1);
+
 for (my $wikitable_p;;) {
-   my $s = scalar <>;
+   my $s = scalar <STDIN>;
 last unless defined $s;
    chomp $s;
    if ($s =~ /^\s*\{\|/s) {
@@ -108,26 +118,29 @@ last unless defined $s;
       $wikitable_p -= 1;
    } elsif ($wikitable_p && $s =~ /^\|(?![-\+])\s*(.*)\s*$/s) {
       my $det = $1;
-      #print "BAR! ($det)\n";
+      print STDERR "BAR! ($det)\n" if $debug_p;
       (my $attrs, $det) = ($1, $2) if $det =~ /^(.*?)\|\s*(.*)$/;
       my $data = $det;
       $det =~ s/(?:／|\s*\/)\s*<br>.*//g;	# kill alternates
+      $det =~ s/\pP.*//sg if $treat_punctuation_as_alternates_p;
+      $det =~ s/<sub>\(存疑\)<\/sub>//g;	# (special case)
       $det =~ s/（[^（）]*）//g;		# kill CJK parentheses
       $det =~ s/<ref\b[^<>]*>.*?<\/ref>//g;	# kill ref tags
       $det =~ s/<[^<>]*>//g;			# kill HTML tags
       $det =~ s/\{\{(?:rp)\|.*?\}\}//g;		# kill rp
       $det =~ s/\{\{(?:kern|ruby|書名|專名)\|([^\|]*?)(?:\s*\|\s*.*?)*\}\}/$1/g;
-      #print "BAZ! ($det)\n";
+      $det =~ s/[\pP\p{Zs}]+//g;		# kill punctuation, kill spaces
+      print STDERR "BAZ! ($det)\n" if $debug_p;
       if ($det =~ /^[\p{Han}]+$/s) {
 	 my $code = encode_word($det);
-	 #print "FOO! ($det) -> ($code)\n";
+	 print STDERR "FOO! ($det) -> ($code)\n" if $debug_p;
 	 if (!defined $attrs) {
 	    $s = sprintf('|data-sort-value=%s| %s', $code, $data);
 	 } else {
-	    $attrs =~ s/data-sort-value="[^""]*"//;
-	    $attrs =~ s/data-sort-value='[^'']*'//;
-	    $attrs =~ s/data-sort-value=\S+//;
-	    $attrs =~ s/data-sort-value=//;
+	    $attrs =~ s/data-sort-value\s*=\s*"[^""]*"\s*//;
+	    $attrs =~ s/data-sort-value\s*=\s*'[^'']*'\s*//;
+	    $attrs =~ s/data-sort-value\s*=\s*\S+\s*//;
+	    $attrs =~ s/data-sort-value\s*=\s*//;
 	    $s = sprintf('|data-sort-value=%s %s| %s', $code, $attrs, $data);
 	 }
       }
