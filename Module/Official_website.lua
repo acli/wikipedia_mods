@@ -161,19 +161,12 @@ function p._main(args)
 	-- LOCAL: restore the Cantonese introducer but make adjustments for non-CJK
 	local default_label = '官方網站';
 	local qid = mw.wikibase.getEntityIdForCurrentPage();
-	-- This gets a dict of all listed properties on Wikidata
-	-- /labels keys another dict indexed by language name (us is /yue).
-	-- The value is another dict with /language and /value keys.
-	-- value is the label in the stated language, which is yue if a
-	-- Cantonese label is entered into Wikidata, otw. it's listed as en.
-	-- The above technically should work but 竹內瑪莉亞 does not have
-	-- a /yue /label so it fails and we get the English name. To work
-	-- around this we can get the /sitelinks element instead, which
-	-- returns a dict containing dicts indexed by the site name (us is
-	-- zh_yuewiki), then get the /title element
+	-- We might be tempted to retrieve the article's title through Wikidata
+	-- this is a bad idea because it will not work if the article is unconnected
 	local data = mw.wikibase.getEntity(qid);
-	if data and data.sitelinks and data.sitelinks.zh_yuewiki then
-		local candidate = data.sitelinks.zh_yuewiki.title;
+	local title = mw.title.getCurrentTitle().text;
+	if title then
+		local candidate = title;
 		-- Cut out any parenthesized qualifier in the label
 		candidate = mw.ustring.gsub(candidate, '%s*%([^%(%)]+%)$', '')
 		-- Check if the label ends in a CJK character
@@ -184,9 +177,9 @@ function p._main(args)
 			english_p = not aux.cjk_p(det);
 		end
 		if english_p then
-			default_label = candidate .. ' 嘅' .. default_label;
+			default_label = title .. ' 嘅' .. default_label;
 		else
-			default_label = candidate .. '嘅' .. default_label;
+			default_label = title .. '嘅' .. default_label;
 		end
 	end
 	-- END LOCAL
@@ -207,29 +200,15 @@ function p._main(args)
 end
 
 function p.main(frame)
-	--[[ LOCAL: disable Module:Arguments
-	-- END LOCAL
 	local args = require('Module:Arguments').getArgs(frame, {
+		--[[ LOCAL: disable incorrect template name
+		-- END LOCAL
 		wrappers = 'Template:Official website'
+		-- LOCAL: replace with correct template name
+		--]]
+		wrappers = 'Template:官網'
+		-- END LOCAL
 	})
-	--]]-- LOCAL: replace with our own code to figure out arguments
-	local parent = frame:getParent();
-	local name = parent:getTitle();
-	local args = {};
-	for k, v in pairs(parent.args) do
-		if k == 1 or k == 'url' or k == 'URL' then
-			args.url = v;
-		elseif k == 2 or k == 'name' then
-			args.name = v;
-		elseif k == 'mobile' then
-			args.mobile = v;
-		elseif k == 'format' then
-			args.format = v;
-		else
-			error(name .. '遇到不明參數 ｢' .. k .. '｣');
-		end
-	end
-	-- END LOCAL
 	return p._main(args)
 end
 
