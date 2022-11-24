@@ -173,8 +173,18 @@ references/reflist, only then does it multiply by 0.95; else multiply by 0.85 */
 .syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
 	clip-path: inset(0 0.14em 0 0);
 }
-a.external.text > span[aria-label] > .pin1ming4 > .saan1,
-a.external.text > span[aria-label] > .syu1ming4 > .saan1 {
+a[href$=".pdf"].external > span[aria-label] > .pin1ming4 > .saan1,
+a[href$=".pdf?"].external > span[aria-label] > .pin1ming4 > .saan1,
+a[href$=".pdf#"].external > span[aria-label] > .pin1ming4 > .saan1,
+a[href$=".PDF"].external > span[aria-label] > .pin1ming4 > .saan1,
+a[href$=".PDF?"].external > span[aria-label] > .pin1ming4 > .saan1,
+a[href$=".PDF#"].external > span[aria-label] > .pin1ming4 > .saan1,
+a[href$=".pdf"].external > span[aria-label] > .syu1ming4 > .saan1,
+a[href$=".pdf?"].external > span[aria-label] > .syu1ming4 > .saan1,
+a[href$=".pdf#"].external > span[aria-label] > .syu1ming4 > .saan1,
+a[href$=".PDF"].external > span[aria-label] > .syu1ming4 > .saan1,
+a[href$=".PDF?"].external > span[aria-label] > .syu1ming4 > .saan1,
+a[href$=".PDF#"].external > span[aria-label] > .syu1ming4 > .saan1 {
 	width: unset;
 	font-size:unset;
 }
