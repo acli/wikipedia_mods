@@ -52,6 +52,11 @@
 .syu1ming4 .hai2zeoi3mei1ge3.zit3 .hai2zeoi3mei1ge3.zi6:after {
 	clip-path: inset(0 0.14em 0 0);
 }
+a.external.text > span[aria-label] > .pin1ming4 > .saan1,
+a.external.text > span[aria-label] > .syu1ming4 > .saan1 {
+	width: unset;
+	font-size:unset;
+}
 /* These are different because are dealing with a rotated glyph. The coordinates
    are backwards so using the normal rules will not work at all
  */
