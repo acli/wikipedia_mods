@@ -3489,12 +3489,23 @@ local function citation0( config, args )
 			utilities.set_message ('err_extra_text_edition');					 -- add error message
 		end
 		Edition = " " .. wrap_msg ('edition', Edition);
+		-- LOCAL: remove ordinal endings
+		if mw.ustring.match(Edition, '^[^第]*第%d+st版[^第]*$') then
+			Edition = mw.ustring.gsub(Edition, 'st', '')
+		elseif mw.ustring.match(Edition, '^[^第]*第%d+nd版[^第]*$') then
+			Edition = mw.ustring.gsub(Edition, 'nd', '')
+		elseif mw.ustring.match(Edition, '^[^第]*第%d+rd版[^第]*$') then
+			Edition = mw.ustring.gsub(Edition, 'rd', '')
+		elseif mw.ustring.match(Edition, '^[^第]*第%d+th版[^第]*$') then
+			Edition = mw.ustring.gsub(Edition, 'th', '')
+		end
+		-- END LOCAL
 		-- LOCAL: handle year-based edition numbering
 		if mw.ustring.match(Edition, '^[^第]*第%d+年[春夏秋冬]?版[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第%d+年%d+月[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第初版[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第再版[^第]*$')
-		or mw.ustring.match(Edition, '^[^第]*第修訂版[^第]*$')
+		or mw.ustring.match(Edition, '^[^第]*第新?修訂版[^第]*$')
 		or mw.ustring.match(Edition, '^[^第]*第神版[^第]*')
 		or mw.ustring.match(Edition, '^[^第]*第上帝版[^第]*') then
 			Edition = mw.ustring.gsub(Edition, '第', '')
