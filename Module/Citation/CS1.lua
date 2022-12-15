@@ -1622,7 +1622,7 @@ local function name_tag_get (lang_param)
 			-- END LOCAL
 			return name, tag;													-- <lang_param_lc> is an unrecognized IETF-like tag so return <name> and language subtag
 		end
-	-- LOCAL: still no match. maybe it's a spoken or *rare* languagee that mw doesn't know about
+	-- LOCAL: still no match. maybe it's a spoken or *rare* language that mw doesn't know about
 	elseif iana.lang[lang_param_lc] then
 		name = iana.lang[lang_param_lc][1];
 		return name, lang_param_lc;
@@ -3513,7 +3513,7 @@ local function citation0( config, args )
 		elseif mw.ustring.match(Edition, '^[^第]*第print版[^第]*') then
 			Edition = mw.ustring.gsub(Edition, '第print', '印刷');
 		elseif mw.ustring.match(Edition, '^[^第]*第revised版[^第]*') then
-			Edition = mw.ustring.gsub(Edition, '第print', '修訂');
+			Edition = mw.ustring.gsub(Edition, '第revised', '修訂');
 		end
 		-- END LOCAL
 	else
@@ -4163,7 +4163,7 @@ local function citation(frame)
 	identifiers = require ('Module:Citation/CS1/Identifiers' .. sandbox);
 	metadata = require ('Module:Citation/CS1/COinS' .. sandbox);
 	styles = 'Module:Citation/CS1' .. sandbox .. '/styles.css';
-	-- LOCAL: load IANA regions from the Lang modulee
+	-- LOCAL: load IANA regions from the Lang module
 	local lang_data =  mw.loadData ('Module:Lang/data');
 	local raw_langs = mw.loadData ('Module:Language/data/iana languages');
 	if lang_data and raw_langs then
