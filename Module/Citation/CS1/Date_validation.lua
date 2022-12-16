@@ -405,7 +405,7 @@ local patterns = {
 	['年'] = {'^(([0-9][0-9][0-9][0-9]))年$', 'a', 'y'},
 	['年季'] = {'^(([0-9][0-9][0-9][0-9]))年([春夏秋冬])[天季]?$'},
 	['年月月'] = {'^(([0-9][0-9][0-9][0-9]))年([0-9][0-9]?)[-–—~至]([0-9][0-9]?)月$', 'a', 'y', 'm', 'm2'},
-	['ym'] = {'^(([0-9][0-9][0-9][0-9]))-([0-9][0-9]?)$', 'a', 'y', 'm'},
+	['ym'] = {'^(([0-9][0-9][0-9][0-9]))-([0-9][0-9])$', 'a', 'y', 'm'},
 	-- END LOCAL
 	 																			-- year-initial numerical year-month-day
 	['ymd'] = {'^(%d%d%d%d)%-(%d%d)%-(%d%d)$', 'y', 'm', 'd'},					
@@ -509,9 +509,13 @@ local function check_date (date_string, param, tCOinS_date)
 		anchor_year, year, month, day = mw.ustring.match (date_string, patterns['年月日'][1]);
 		if 12 < tonumber(month) or 1 > tonumber(month) or 1582 > tonumber(year) or 0 == tonumber(day) then return false; end	-- month or day number not valid or not Gregorian calendar
 
-	elseif mw.ustring.match(date_string, patterns['年月'][1]) 
-		or mw.ustring.match(date_string, patterns['ym'][1]) then
+	elseif mw.ustring.match(date_string, patterns['年月'][1]) then
 		anchor_year, year, month = mw.ustring.match(date_string, patterns['年月'][1]);
+		if not is_valid_year(year) then return false; end
+		if 12 < tonumber(month) or 1 > tonumber(month) then return false; end
+
+	elseif mw.ustring.match(date_string, patterns['ym'][1]) then
+		anchor_year, year, month = mw.ustring.match(date_string, patterns['ym'][1]);
 		if not is_valid_year(year) then return false; end
 		if 12 < tonumber(month) or 1 > tonumber(month) then return false; end
 
