@@ -1613,9 +1613,11 @@ local function name_tag_get (lang_param)
 
 	if tag then
 		name = cfg.mw_languages_by_tag_t[tag];									-- attempt to get a language name using the shortened <tag>
-		if not name and iana.lang[tag] then										-- handle spoken/rare languages
+		-- LOCAL: handle spoken/rare languages
+		if not name and iana.lang[tag] then
 			name = iana.lang[tag][1];
 		end
+		-- END LOCAL
 		if name then
 			-- LOCAL: do final analysis on which name to use
 			if mw.ustring.match(name, '^[ -~]+$') and candidate5 then			-- if it looks like English but we got something earlier
