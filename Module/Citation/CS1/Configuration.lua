@@ -79,7 +79,7 @@ local messages = {
 	['language'] = '($1)',
 	['via'] = " &ndash;透過$1",
 	['event'] = '時間',		-- 指 time 參數，引用影片/錄音乜嘢時間開始嘅部分
-	['minutes'] = '分鐘',	-- 指 minute 參數，引用影片/錄音第幾分鐘開始嘅部分
+	['minutes'] = '分鐘',	-- 指 minutes 參數，引用影片/錄音第幾分鐘開始嘅部分
 	
 	-- Determines the location of the help page
 	['help page link'] = 'Help:CS1 errors',
