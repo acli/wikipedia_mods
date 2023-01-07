@@ -1590,7 +1590,7 @@ local function name_tag_get (lang_param)
 	local attr;
 	local candidate5;
 	if name and mw.ustring.match(name, '^[ -~]+$') then
-		candidate5 = name;
+		candidate5 = {['name'] = name; ['tag'] = lang_param_lc};
 		name = nil;
 	end
 	-- END LOCAL
@@ -1599,11 +1599,11 @@ local function name_tag_get (lang_param)
 		return name, lang_param_lc;												-- <lang_param_lc> is a tag so return it and <name>
 	end
 	
-	-- LOCAL
+	-- LOCAL: disable the original subtag stripping code
 	if 0 then
 	-- END LOCAL
 	tag = lang_param_lc:match ('^(%a%a%a?)%-.*');								-- is <lang_param_lc> an IETF-like tag that MediaWiki doesn't recognize? <tag> gets the language subtag; nil else
-	-- LOCAL
+	-- LOCAL: replace subtag stripping code with a version that saves the subtag
 	end
 	tag, attr = lang_param_lc:match ('^(%a%a%a?)%-(.*)');						-- is <lang_param_lc> an IETF-like tag that MediaWiki doesn't recognize? <tag> gets the language subtag; nil else
 	-- END LOCAL
@@ -1613,10 +1613,11 @@ local function name_tag_get (lang_param)
 		if name then
 			-- LOCAL: do final analysis on which name to use
 			if mw.ustring.match(name, '^[ -~]+$') and candidate5 then			-- if it looks like English but we got something earlier
-				return candidate5;												-- then use the earlier result
+				return candidate5.name, candidate5.tag;							-- then use the earlier result
 			end
 			if attr and iana.region[attr] then
 				name = iana.region[attr][1] .. name;
+				tag = tag .. '-' .. attr;										-- add the country subtag back
 				attr = nil;
 			end
 			-- END LOCAL
