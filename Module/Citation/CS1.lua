@@ -1606,10 +1606,16 @@ local function name_tag_get (lang_param)
 	-- LOCAL: replace subtag stripping code with a version that saves the subtag
 	end
 	tag, attr = lang_param_lc:match ('^(%a%a%a?)%-(.*)');						-- is <lang_param_lc> an IETF-like tag that MediaWiki doesn't recognize? <tag> gets the language subtag; nil else
+	if not tag then
+		tag = lang_param_lc:match ('^(%a%a%a?)');								-- handle spoken/rare languagees with no region code
+	end
 	-- END LOCAL
 
 	if tag then
 		name = cfg.mw_languages_by_tag_t[tag];									-- attempt to get a language name using the shortened <tag>
+		if not name and iana.lang[tag] then										-- handle spoken/rare languages
+			name = iana.lang[tag][1];
+		end
 		if name then
 			-- LOCAL: do final analysis on which name to use
 			if mw.ustring.match(name, '^[ -~]+$') and candidate5 then			-- if it looks like English but we got something earlier
@@ -1623,11 +1629,6 @@ local function name_tag_get (lang_param)
 			-- END LOCAL
 			return name, tag;													-- <lang_param_lc> is an unrecognized IETF-like tag so return <name> and language subtag
 		end
-	-- LOCAL: still no match. maybe it's a spoken or *rare* language that mw doesn't know about
-	elseif iana.lang[lang_param_lc] then
-		name = iana.lang[lang_param_lc][1];
-		return name, lang_param_lc;
-	-- END LOCAL
 	end
 end
 
