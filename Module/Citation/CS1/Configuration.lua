@@ -1038,7 +1038,7 @@ local lang_name_remap = {														-- used for |language=; names require pro
 	['ilocano'] = {'Ilocano', 'ilo'},											-- MediaWiki/IANA/ISO 639: Iloko; use en.wiki preferred name
 	['kolsch'] = {'Kölsch', 'ksh'},												-- use IANA/ISO 639 preferred name (use non-diacritical o instead of umlaut ö)
 	['kölsch'] = {'Kölsch', 'ksh'},												-- use IANA/ISO 639 preferred name
-	['ripuarian'] = {'Ripuarian', 'mis-x-ripuar'},								-- group of dialects; no code in MediaWiki or in IANA/ISO 63
+	['ripuarian'] = {'Ripuarian', 'mis-x-ripuar'},								-- group of dialects; no code in MediaWiki or in IANA/ISO 639
 	['taiwanese hokkien'] = {'Taiwanese Hokkien', 'nan-tw'},					-- make room for MediaWiki/IANA/ISO 639 nan: Min Nan Chinese 
 	['tosk albanian'] = {'Tosk Albanian', 'als'},								-- MediaWiki replaces 'Tosk Albanian' with 'Alemannisch' so 'Tosk Albanian' cannot be found
 	['valencian'] = {'Valencian', 'ca'},										-- variant of Catalan; categorizes as Catalan
