@@ -1018,7 +1018,7 @@ local lang_code_remap = {														-- used for |language= and |script-title=
 	['bn'] = 'Bengali',															-- MediaWiki returns Bangla
 	['ca-valencia'] = 'Valencian',												-- IETF variant of Catalan
 	['cmn-cn'] = '中國普通話',
-	['cmn-tw'] = '台灣國語',
+	['cmn-tw'] = '臺灣國語',
 	['ilo'] = 'Ilocano',														-- MediaWiki/IANA/ISO 639: Iloko; use en.wiki preferred name
 	['ksh'] = 'Kölsch',															-- MediaWiki: Colognian; use IANA/ISO 639 preferred name
 	['ksh-x-colog'] = 'Colognian',												-- override MediaWiki ksh; no IANA/ISO 639 code for Colognian; IETF private code created at Module:Lang/data
