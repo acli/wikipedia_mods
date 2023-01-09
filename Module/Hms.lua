@@ -33,21 +33,34 @@ function p.main(frame)
 		end
 	else
 		if mw.ustring.find(tmp, 'class="duration"', 1, yes) then return tmp end -- if there is already a microformat, don't do anything
-		-- LOCAL: handle Cantonese durations
-		local hh, mm, ss;
-		hh, mm, ss = mw.ustring.match(tmp, '(%d+)時(%d+)分(%d+%.?%d*)秒')
-		if ss then
-			tmp = hh .. ':' .. mm .. ':' .. ss
-		else
-			mm, ss = mw.ustring.match(tmp, '(%d+)分(%d+%.?%d*)秒')
-			if ss then
-				tmp = '0:' .. mm .. ':' .. ss
-			else
-				mm, ss = mw.ustring.match(tmp, '(%d+%.?%d*)秒')
-				if ss then
-					tmp = '00:00:' .. ss
-				end
-			end
+		-- LOCAL: Handle Cantonese durations
+		local h, hu, m, mu, s, su;
+		h, hu, m, mu, s, su = mw.ustring.match(tmp, '(%d+)(時)(%d+)(分鐘?)(%d+%.?%d*)(秒)')
+		if s then
+			return '<span class="duration">'
+				.. '<span class="h">' .. h ..'</span>' .. hu
+				.. '<span class="min">' .. m ..'</span>' .. mu
+				.. '<span class="s">' .. s ..'</span>' .. su
+				.. '</span>'
+		end
+		m, mu, s, su = mw.ustring.match(tmp, '(%d+)(分鐘?)(%d+%.?%d*)(秒)')
+		if s then
+			return '<span class="duration">'
+				.. '<span class="min">' .. m ..'</span>' .. mu
+				.. '<span class="s">' .. s ..'</span>' .. su
+				.. '</span>'
+		end
+		s, su = mw.ustring.match(tmp, '(%d+%.?%d*)(秒)')
+		if s then
+			return '<span class="duration">'
+				.. '<span class="s">' .. s ..'</span>' .. su
+				.. '</span>'
+		end
+		m, mu = mw.ustring.match(tmp, '(%d+)(分鐘?)')
+		if m then
+			return '<span class="duration">'
+				.. '<span class="min">' .. m ..'</span>' .. mu
+				.. '</span>'
 		end
 		-- END LOCAL
 		duration = mw.text.split(mw.ustring.match(tmp, '%d*:?%d+:%d+%.?%d*') or '', ':') -- split into table
